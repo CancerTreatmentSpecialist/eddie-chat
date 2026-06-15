@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Eddie Lung Risk Assessment</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #F4F8FA;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+      color: #37474F;
+    }
+
+    .header {
+      background: #78909C;
+      padding: 48px 18px 16px;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 2px 8px rgba(120,144,156,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-title { color: white; font-size: 18px; font-weight: 600; text-align: center; }
+    .header-sub { color: #CFD8DC; font-size: 12px; text-align: center; margin-top: 2px; }
+
+    .progress-wrap { padding: 12px 16px 0; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #78909C; margin-bottom: 6px; }
+    .progress-bar { height: 4px; background: #ECEFF1; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #4FC3F7; border-radius: 2px; transition: width 0.4s ease; width: 0%; }
+
+    .content { padding: 16px; padding-bottom: 100px; }
+
+    .section-card {
+      background: white; border-radius: 16px; padding: 20px; margin-bottom: 14px;
+      border: 1px solid #ECEFF1; box-shadow: 0 1px 4px rgba(120,144,156,0.08);
+    }
+    .section-title { font-size: 15px; font-weight: 600; color: #546E7A; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .section-icon { width: 28px; height: 28px; background: #E1F5FE; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .section-desc { font-size: 12px; color: #90A4AE; margin-bottom: 16px; margin-left: 36px; }
+
+    .question { margin-bottom: 18px; }
+    .question-label { font-size: 13px; font-weight: 500; color: #37474F; margin-bottom: 8px; }
+    .question-hint { font-size: 11px; color: #90A4AE; margin-bottom: 8px; }
+
+    .slider-value { text-align: center; font-size: 22px; font-weight: 700; color: #546E7A; margin-bottom: 6px; }
+    .slider-unit { font-size: 13px; font-weight: 400; color: #90A4AE; }
+    input[type="range"] {
+      width: 100%; height: 6px; border-radius: 3px; background: #ECEFF1;
+      outline: none; -webkit-appearance: none; appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+      background: #546E7A; cursor: pointer; box-shadow: 0 2px 6px rgba(84,110,122,0.4);
+    }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: #90A4AE; margin-top: 4px; }
+
+    .toggle-group { display: flex; gap: 8px; }
+    .toggle-btn {
+      flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #ECEFF1;
+      background: white; font-size: 13px; font-weight: 500; color: #90A4AE;
+      cursor: pointer; text-align: center; transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+    }
+    .toggle-btn.selected { background: #546E7A; border-color: #546E7A; color: white; }
+    .toggle-btn.selected-no { background: #F4F8FA; border-color: #4FC3F7; color: #37474F; }
+
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+      border: 1.5px solid #ECEFF1; background: white; cursor: pointer; transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .checkbox-item.checked { background: #E1F5FE; border-color: #4FC3F7; }
+    .checkbox-box {
+      width: 20px; height: 20px; border-radius: 6px; border: 2px solid #CFD8DC; background: white;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; transition: all 0.2s;
+    }
+    .checkbox-item.checked .checkbox-box { background: #4FC3F7; border-color: #4FC3F7; color: white; }
+    .checkbox-text { font-size: 13px; color: #37474F; }
+
+    .radio-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .radio-item {
+      padding: 10px 8px; border-radius: 10px; border: 1.5px solid #ECEFF1; background: white;
+      cursor: pointer; text-align: center; font-size: 12px; color: #37474F; transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .radio-item.selected { background: #E1F5FE; border-color: #4FC3F7; color: #0277BD; font-weight: 600; }
+
+    .calc-box { background: #E1F5FE; border-radius: 14px; padding: 16px; margin-top: 6px; border: 1px solid #B3E5FC; }
+    .calc-result { text-align: center; margin-top: 8px; }
+    .calc-result-value { font-size: 32px; font-weight: 800; color: #0277BD; }
+    .calc-result-label { font-size: 12px; color: #0288A1; font-weight: 500; }
+
+    .submit-wrap { padding: 0 16px 32px; }
+    .submit-btn {
+      width: 100%; padding: 16px; border-radius: 14px; background: #546E7A; color: white;
+      font-size: 16px; font-weight: 600; border: none; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(84,110,122,0.35); -webkit-tap-highlight-color: transparent;
+    }
+    .submit-btn:active { opacity: 0.9; }
+    .disclaimer-text { text-align: center; font-size: 10px; color: #90A4AE; margin-top: 10px; line-height: 1.5; padding: 0 8px; }
+
+    .results-page { display: none; padding: 16px; padding-bottom: 100px; }
+
+    .eligibility-banner { border-radius: 16px; padding: 18px; margin-bottom: 14px; text-align: center; }
+    .eligibility-banner.eligible { background: #E1F5FE; border: 2px solid #4FC3F7; }
+    .eligibility-banner.not-eligible { background: #ECEFF1; border: 2px solid #CFD8DC; }
+    .eligibility-icon { font-size: 36px; margin-bottom: 6px; }
+    .eligibility-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .eligibility-banner.eligible .eligibility-title { color: #0277BD; }
+    .eligibility-banner.not-eligible .eligibility-title { color: #607D8B; }
+    .eligibility-text { font-size: 12px; color: #455A64; line-height: 1.5; }
+
+    .risk-badge { text-align: center; padding: 32px 20px; border-radius: 20px; margin-bottom: 16px; }
+    .risk-badge.low { background: #E8F5E9; border: 2px solid #43A047; }
+    .risk-badge.moderate { background: #FFF3E0; border: 2px solid #FB8C00; }
+    .risk-badge.high { background: #FFEBEE; border: 2px solid #E53935; }
+    .risk-emoji { font-size: 48px; margin-bottom: 8px; }
+    .risk-level { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .risk-badge.low .risk-level { color: #2E7D32; }
+    .risk-badge.moderate .risk-level { color: #E65100; }
+    .risk-badge.high .risk-level { color: #C62828; }
+    .risk-subtitle { font-size: 13px; color: #607D8B; }
+
+    .result-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #ECEFF1; }
+    .result-card-title { font-size: 14px; font-weight: 600; color: #546E7A; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .result-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 13px; color: #37474F; line-height: 1.5; }
+    .result-dot { width: 6px; height: 6px; border-radius: 50%; background: #4FC3F7; margin-top: 6px; flex-shrink: 0; }
+
+    .eddie-btn {
+      width: 100%; padding: 16px; border-radius: 14px; background: #4FC3F7; color: #01579B;
+      font-size: 15px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 10px;
+      box-shadow: 0 4px 12px rgba(79,195,247,0.35); display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .retake-btn {
+      width: 100%; padding: 14px; border-radius: 14px; background: white; color: #546E7A;
+      font-size: 15px; font-weight: 600; border: 2px solid #546E7A; cursor: pointer;
+    }
+
+    .score-bar-wrap { margin: 16px 0; }
+    .score-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: #90A4AE; margin-bottom: 6px; }
+    .score-bar { height: 8px; background: #ECEFF1; border-radius: 4px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+    .score-bar-fill.low { background: #43A047; }
+    .score-bar-fill.moderate { background: #FB8C00; }
+    .score-bar-fill.high { background: #E53935; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-title">🫁 Eddie Lung Risk Assessment</div>
+    <div class="header-sub">Lung Cancer Screening & Risk Companion</div>
+  </div>
+
+  <div id="assessmentForm">
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progressLabel">Section 1 of 4</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="content">
+
+      <div class="section-card">
+        <div class="section-title">
+          <div class="section-icon">👤</div>
+          Section 1 — About You
+        </div>
+        <div class="section-desc">Basic information used in screening guidelines</div>
+
+        <div class="question">
+          <div class="question-label">What is your age?</div>
+          <div class="slider-value"><span id="ageVal">60</span> <span class="slider-unit">years old</span></div>
+          <input type="range" min="35" max="85" value="60" id="ageSlider"
+            oninput="document.getElementById('ageVal').textContent=this.value; updateProgress()">
+          <div class="slider-labels"><span>35</span><span>85+</span></div>
+        </div>
+
+        <div class="question">
+          <div class="question-label">Have you ever smoked cigarettes?</div>
+          <div class="question-hint">Smoking history is the most important factor in lung cancer risk</div>
+          <div class="radio-group" id="smokingGroup">
+            <div class="radio-item" onclick="selectSmoking(this, 'never')">Never smoked</div>
+            <div class="radio-item" onclick="selectSmoking(this, 'former')">Former smoker</div>
+            <div class="radio-item" onclick="selectSmoking(this, 'current')">Current smoker</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card" id="smokingHistorySection" style="display:none;">
+        <div class="section-title">
+          <div class="section-icon">🚬</div>
+          Section 2 — Smoking History
+        </div>
+        <div class="section-desc">Your pack-year history determines screening eligibility</div>
+
+        <div class="question">
+          <div class="question-label">On average, how many cigarettes do/did you smoke per day?</div>
+          <div class="slider-value"><span id="cigVal">20</span> <span class="slider-unit">cigarettes/day</span></div>
+          <input type="range" min="1" max="60" value="20" id="cigSlider"
+            oninput="document.getElementById('cigVal').textContent=this.value; calculatePackYears()">
+          <div class="slider-labels"><span>1</span><span>60</span></div>
+        </div>
+
+        <div class="question">
+          <div class="question-label">For how many years have/did you smoke?</div>
+          <div class="slider-value"><span id="yearsSmokedVal">20</span> <span class="slider-unit">years</span></div>
+          <input type="range" min="1" max="60" value="20" id="yearsSmokedSlider"
+            oninput="document.getElementById('yearsSmokedVal').textContent=this.value; calculatePackYears()">
+          <div class="slider-labels"><span>1</span><span>60</span></div>
+        </div>
+
+        <div class="calc-box">
+          <div class="question-label" style="margin-bottom:0;">Your calculated pack-year history</div>
+          <div class="question-hint">1 pack-year = smoking 20 cigarettes/day for 1 year</div>
+          <div class="calc-result">
+            <div class="calc-result-value" id="packYearsVal">20</div>
+            <div class="calc-result-label">pack-years</div>
+          </div>
+        </div>
+
+        <div class="question" id="quitYearsQuestion" style="display:none; margin-top:18px;">
+          <div class="question-label">How many years ago did you quit smoking?</div>
+          <div class="slider-value"><span id="quitYearsVal">5</span> <span class="slider-unit">years ago</span></div>
+          <input type="range" min="0" max="40" value="5" id="quitYearsSlider"
+            oninput="document.getElementById('quitYearsVal').textContent=this.value; updateProgress()">
+          <div class="slider-labels"><span>0</span><span>40+</span></div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">
+          <div class="section-icon">🏭</div>
+          Section 3 — Family History & Exposures
+        </div>
+        <div class="section-desc">Other factors that can increase lung cancer risk</div>
+
+        <div class="question">
+          <div class="question-label">Has a parent, sibling, or child been diagnosed with lung cancer?</div>
+          <div class="toggle-group">
+            <div class="toggle-btn" onclick="selectToggle(this, 'familyHistory', true)">✅ Yes</div>
+            <div class="toggle-btn" onclick="selectToggle(this, 'familyHistory', false)">❌ No</div>
+            <div class="toggle-btn" onclick="selectToggle(this, 'familyHistory', null)">🤷 Don't know</div>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="question-label">Have you been exposed to asbestos, silica, diesel exhaust, or industrial chemicals at work?</div>
+          <div class="toggle-group">
+            <div class="toggle-btn" onclick="selectToggle(this, 'occupational', true)">✅ Yes</div>
+            <div class="toggle-btn" onclick="selectToggle(this, 'occupational', false)">❌ No</div>
+            <div class="toggle-btn" onclick="selectToggle(this, 'occupational', null)">🤷 Don't know</div>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="question-label">Has your home ever tested high for radon, or do you live in a high-radon area?</div>
+          <div class="toggle-group">
+            <div class="toggle-btn" onclick="selectToggle(this, 'radon', true)">✅ Yes</div>
+            <div class="toggle-btn" onclick="selectToggle(this, 'radon', false)">❌ No</div>
+            <div class="toggle-btn" onclick="selectToggle(this, 'radon', null)">🤷 Don't know</div>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="question-label">Have you been diagnosed with COPD, emphysema, or chronic bronchitis?</div>
+          <div class="toggle-group">
+            <div class="toggle-btn" onclick="selectToggle(this, 'copd', true)">✅ Yes</div>
+            <div class="toggle-btn" onclick="selectToggle(this, 'copd', false)">❌ No</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">
+          <div class="section-icon">🔍</div>
+          Section 4 — Symptoms
+        </div>
+        <div class="section-desc">Check all symptoms you are currently experiencing</div>
+
+        <div class="checkbox-group" id="symptomsGroup">
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'persistent_cough')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">Cough that doesn't go away or worsens (3+ weeks)</div>
+          </div>
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'coughing_blood')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">Coughing up blood, even a small amount</div>
+          </div>
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'chest_pain')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">Chest pain that worsens with deep breathing, coughing, or laughing</div>
+          </div>
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'shortness_breath')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">Shortness of breath or new wheezing</div>
+          </div>
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'hoarseness')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">Hoarseness or voice changes</div>
+          </div>
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'weight_loss')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">Unexplained weight loss</div>
+          </div>
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'infections')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">Recurring bronchitis or pneumonia infections</div>
+          </div>
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'fatigue')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">Ongoing fatigue or weakness</div>
+          </div>
+          <div class="checkbox-item" onclick="toggleCheckbox(this, 'none')">
+            <div class="checkbox-box">✓</div>
+            <div class="checkbox-text">None of the above</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="submit-wrap">
+      <button class="submit-btn" onclick="calculateRisk()">
+        🫁 Calculate My Lung Cancer Risk
+      </button>
+      <div class="disclaimer-text">
+        This assessment is for educational purposes only and does not constitute medical advice or diagnosis. Always consult a physician for personalized evaluation and screening recommendations.
+      </div>
+    </div>
+
+  </div>
+
+  <div id="resultsPage" class="results-page">
+
+    <div id="eligibilityBanner" class="eligibility-banner">
+      <div class="eligibility-icon" id="eligibilityIcon">🩺</div>
+      <div class="eligibility-title" id="eligibilityTitle">Screening Eligibility</div>
+      <div class="eligibility-text" id="eligibilityText"></div>
+    </div>
+
+    <div id="riskBadge" class="risk-badge">
+      <div class="risk-emoji" id="riskEmoji">🟢</div>
+      <div class="risk-level" id="riskLevel">Low Risk</div>
+      <div class="risk-subtitle" id="riskSubtitle"></div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">📊 Your Risk Score</div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-label"><span>Low</span><span>Moderate</span><span>High</span></div>
+        <div class="score-bar"><div class="score-bar-fill" id="scoreBarFill" style="width: 0%"></div></div>
+      </div>
+      <div style="text-align:center; font-size:13px; color:#90A4AE; margin-top:8px;" id="scoreText"></div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">💡 What This Means</div>
+      <div id="riskMeaning"></div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">✅ Recommended Next Steps</div>
+      <div id="nextSteps"></div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">❓ Questions to Ask Your Doctor</div>
+      <div id="doctorQuestions"></div>
+    </div>
+
+    <div style="padding: 0 0 16px;">
+      <button class="eddie-btn" onclick="openEddie()">
+        💬 Ask EDDIE Lung for More Information
+      </button>
+      <button class="retake-btn" onclick="retakeAssessment()">
+        🔄 Retake Assessment
+      </button>
+    </div>
+
+    <div class="disclaimer-text" style="padding-bottom: 32px;">
+      Eddie Lung provides educational information only — not medical advice or diagnosis. Screening recommendations are based on USPSTF 2021 guidelines. Always consult a physician to determine if lung cancer screening (low-dose CT) is right for you.
+    </div>
+
+  </div>
+
+<script>
+  const answers = {
+    age: 60,
+    smokingStatus: null,
+    cigsPerDay: 20,
+    yearsSmoked: 20,
+    packYears: 20,
+    quitYears: 5,
+    familyHistory: null,
+    occupational: null,
+    radon: null,
+    copd: null,
+    symptoms: []
+  };
+
+  function updateProgress() {
+    answers.age = parseInt(document.getElementById('ageSlider').value);
+    let filled = 0;
+    if (answers.age) filled++;
+    if (answers.smokingStatus !== null) filled++;
+    if (answers.smokingStatus === 'never') filled++;
+    else if (answers.smokingStatus) filled++;
+    if (answers.familyHistory !== null) filled++;
+    if (answers.occupational !== null) filled++;
+    if (answers.copd !== null) filled++;
+    const pct = Math.min(100, Math.round((filled / 6) * 100));
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+    const section = pct < 25 ? '1' : pct < 50 ? '2' : pct < 75 ? '3' : '4';
+    document.getElementById('progressLabel').textContent = 'Section ' + section + ' of 4';
+  }
+
+  function selectSmoking(el, value) {
+    document.querySelectorAll('#smokingGroup .radio-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    answers.smokingStatus = value;
+
+    const historySection = document.getElementById('smokingHistorySection');
+    const quitQuestion = document.getElementById('quitYearsQuestion');
+
+    if (value === 'never') {
+      historySection.style.display = 'none';
+      answers.packYears = 0;
+    } else {
+      historySection.style.display = 'block';
+      calculatePackYears();
+      if (value === 'former') {
+        quitQuestion.style.display = 'block';
+      } else {
+        quitQuestion.style.display = 'none';
+      }
+    }
+    updateProgress();
+  }
+
+  function calculatePackYears() {
+    const cigs = parseInt(document.getElementById('cigSlider').value);
+    const years = parseInt(document.getElementById('yearsSmokedSlider').value);
+    answers.cigsPerDay = cigs;
+    answers.yearsSmoked = years;
+    const packYears = Math.round((cigs / 20) * years * 10) / 10;
+    answers.packYears = packYears;
+    document.getElementById('packYearsVal').textContent = packYears;
+    updateProgress();
+  }
+
+  function selectToggle(el, key, value) {
+    const group = el.parentElement;
+    group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('selected', 'selected-no'));
+    if (value === true) el.classList.add('selected');
+    else if (value === false) el.classList.add('selected-no');
+    else el.classList.add('selected');
+    answers[key] = value;
+    updateProgress();
+  }
+
+  function toggleCheckbox(el, symptom) {
+    if (symptom === 'none') {
+      document.querySelectorAll('#symptomsGroup .checkbox-item').forEach(i => i.classList.remove('checked'));
+      el.classList.add('checked');
+      answers.symptoms = ['none'];
+      return;
+    }
+    document.querySelectorAll('#symptomsGroup .checkbox-item').forEach(i => {
+      if (i.querySelector('.checkbox-text').textContent === 'None of the above') i.classList.remove('checked');
+    });
+    answers.symptoms = answers.symptoms.filter(s => s !== 'none');
+    el.classList.toggle('checked');
+    if (el.classList.contains('checked')) {
+      if (!answers.symptoms.includes(symptom)) answers.symptoms.push(symptom);
+    } else {
+      answers.symptoms = answers.symptoms.filter(s => s !== symptom);
+    }
+  }
+
+  function calculateRisk() {
+    let score = 0;
+    const age = parseInt(document.getElementById('ageSlider').value);
+    answers.age = age;
+
+    if (answers.smokingStatus === 'former') {
+      answers.quitYears = parseInt(document.getElementById('quitYearsSlider').value);
+    }
+
+    if (age < 50) score += 0;
+    else if (age <= 59) score += 1;
+    else if (age <= 69) score += 2;
+    else score += 3;
+
+    const py = answers.packYears;
+    if (py < 20) score += 0;
+    else if (py < 30) score += 2;
+    else if (py < 40) score += 3;
+    else score += 4;
+
+    if (answers.smokingStatus === 'current') score += 3;
+    else if (answers.smokingStatus === 'former') {
+      if (answers.quitYears <= 15) score += 2;
+    }
+
+    if (answers.familyHistory === true) score += 2;
+    if (answers.occupational === true) score += 2;
+    if (answers.radon === true) score += 1;
+    if (answers.copd === true) score += 2;
+
+    const seriousSymptoms = ['coughing_blood', 'weight_loss'];
+    const serious = answers.symptoms.filter(s => seriousSymptoms.includes(s)).length;
+    const other = answers.symptoms.filter(s => !seriousSymptoms.includes(s) && s !== 'none').length;
+    score += serious * 2;
+    score += other * 1;
+
+    const maxScore = 27;
+    let riskLevel, riskClass, emoji, subtitle;
+
+    if (score <= 7) {
+      riskLevel = 'Low Risk'; riskClass = 'low'; emoji = '🟢';
+      subtitle = 'Your responses suggest a lower risk profile';
+    } else if (score <= 16) {
+      riskLevel = 'Moderate Risk'; riskClass = 'moderate'; emoji = '🟡';
+      subtitle = 'Some risk factors are present — discuss with your doctor';
+    } else {
+      riskLevel = 'High Risk'; riskClass = 'high'; emoji = '🔴';
+      subtitle = 'Multiple risk factors identified — please see a doctor soon';
+    }
+
+    const pct = Math.min(100, Math.round((score / maxScore) * 100));
+
+    const ageEligible = age >= 50 && age <= 80;
+    const packYearsEligible = py >= 20;
+    const smokingEligible = answers.smokingStatus === 'current' ||
+      (answers.smokingStatus === 'former' && answers.quitYears <= 15);
+    const eligible = ageEligible && packYearsEligible && smokingEligible;
+
+    document.getElementById('assessmentForm').style.display = 'none';
+    document.getElementById('resultsPage').style.display = 'block';
+    window.scrollTo(0, 0);
+
+    const banner = document.getElementById('eligibilityBanner');
+    if (eligible) {
+      banner.className = 'eligibility-banner eligible';
+      document.getElementById('eligibilityIcon').textContent = '✅';
+      document.getElementById('eligibilityTitle').textContent = 'You may qualify for lung cancer screening';
+      document.getElementById('eligibilityText').textContent =
+        'Based on USPSTF guidelines, adults aged 50-80 with a 20+ pack-year smoking history who currently smoke (or quit within the last 15 years) should talk to their doctor about annual low-dose CT (LDCT) screening.';
+    } else {
+      banner.className = 'eligibility-banner not-eligible';
+      document.getElementById('eligibilityIcon').textContent = 'ℹ️';
+      document.getElementById('eligibilityTitle').textContent = 'Screening Guidelines';
+      let reasons = [];
+      if (!ageEligible) reasons.push('your age is outside the 50-80 screening range');
+      if (!packYearsEligible) reasons.push('your pack-year history is under 20');
+      if (!smokingEligible) reasons.push('your smoking status does not currently meet screening criteria');
+      document.getElementById('eligibilityText').textContent =
+        'Based on USPSTF guidelines, you may not currently meet the criteria for annual low-dose CT screening (' +
+        reasons.join('; ') + '). This can change over time — discuss your personal risk with your doctor.';
+    }
+
+    const badge = document.getElementById('riskBadge');
+    badge.className = 'risk-badge ' + riskClass;
+    document.getElementById('riskEmoji').textContent = emoji;
+    document.getElementById('riskLevel').textContent = riskLevel;
+    document.getElementById('riskSubtitle').textContent = subtitle;
+    document.getElementById('scoreText').textContent = 'Risk Score: ' + score + ' / ' + maxScore;
+
+    const fill = document.getElementById('scoreBarFill');
+    fill.className = 'score-bar-fill ' + riskClass;
+    setTimeout(() => { fill.style.width = pct + '%'; }, 100);
+
+    const meanings = {
+      low: [
+        'Your age, smoking history, and other factors suggest a relatively lower risk of lung cancer at this time.',
+        'Lung cancer risk increases significantly with smoking history, so if you smoke, quitting is the single most powerful step you can take.',
+        'If you have never smoked but have symptoms, those should still be discussed with a doctor.'
+      ],
+      moderate: [
+        'You have one or more risk factors that warrant attention and discussion with your doctor.',
+        'This does not mean you have lung cancer — but it does mean it is worth being proactive about your lung health.',
+        'If you smoke, quitting now meaningfully reduces your future risk, even after years of smoking.'
+      ],
+      high: [
+        'Multiple risk factors have been identified that suggest a higher risk profile for lung cancer.',
+        'This assessment is not a diagnosis — only a medical professional can evaluate and diagnose lung conditions.',
+        'Symptoms like coughing up blood or unexplained weight loss should be evaluated promptly.',
+        'Early detection through screening significantly improves lung cancer outcomes.'
+      ]
+    };
+
+    const steps = {
+      low: [
+        'If you smoke, ask your doctor about resources to help you quit — this is the most impactful action for lung health',
+        'Discuss your family history and any environmental exposures with your primary care doctor',
+        'Test your home for radon if you have not already — radon test kits are inexpensive and widely available',
+        'Return for reassessment annually, especially if your smoking history or symptoms change'
+      ],
+      moderate: [
+        'Talk to your doctor about whether low-dose CT (LDCT) screening is appropriate for you',
+        'If you smoke, ask about smoking cessation programs, medications, and support — quitting reduces risk at any age',
+        'Discuss your occupational and radon exposure history with your doctor',
+        'Monitor any symptoms and report new or worsening ones promptly',
+        'Return for reassessment in 6-12 months or sooner if symptoms develop'
+      ],
+      high: [
+        'Schedule an appointment with your doctor as soon as possible to discuss your results',
+        'Ask specifically about low-dose CT (LDCT) lung cancer screening',
+        'If you have symptoms like coughing up blood, unexplained weight loss, or persistent chest pain, seek evaluation promptly',
+        'If you currently smoke, ask about cessation support — quitting still provides benefit even at this stage',
+        'Bring a family member to your appointment for support',
+        'Contact Eddie Lung below for help preparing questions for your appointment'
+      ]
+    };
+
+    const questions = {
+      low: [
+        'Based on my history, do I need lung cancer screening?',
+        'What can I do to lower my lung cancer risk further?',
+        'Should I test my home for radon?',
+        'What symptoms should prompt me to see you sooner?'
+      ],
+      moderate: [
+        'Do I meet the criteria for annual low-dose CT screening?',
+        'What resources are available to help me quit smoking?',
+        'How does my occupational history affect my risk?',
+        'How often should I be screened going forward?',
+        'What does a low-dose CT scan involve?'
+      ],
+      high: [
+        'Based on my pack-year history, should I start LDCT screening now?',
+        'What do my symptoms suggest, and what tests do you recommend?',
+        'If something is found on a scan, what happens next?',
+        'What support is available to help me quit smoking?',
+        'Should I see a pulmonologist?',
+        'Can I bring someone with me to my next appointment?'
+      ]
+    };
+
+    const key = riskClass;
+    document.getElementById('riskMeaning').innerHTML = meanings[key].map(m =>
+      '<div class="result-item"><div class="result-dot"></div><div>' + m + '</div></div>').join('');
+    document.getElementById('nextSteps').innerHTML = steps[key].map(s =>
+      '<div class="result-item"><div class="result-dot"></div><div>' + s + '</div></div>').join('');
+    document.getElementById('doctorQuestions').innerHTML = questions[key].map(q =>
+      '<div class="result-item"><div class="result-dot"></div><div>' + q + '</div></div>').join('');
+
+    window.riskResult = { level: riskLevel, score: score, riskClass: riskClass, eligible: eligible, packYears: py };
+  }
+
+  function openEddie() {
+    window.location.href = 'eddie-lung-chat.html';
+  }
+
+  function retakeAssessment() {
+    document.getElementById('resultsPage').style.display = 'none';
+    document.getElementById('assessmentForm').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+
+  updateProgress();
+</script>
+
+</body>
+</html>
