@@ -16,6 +16,8 @@
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
+      /* Safe area for iPhone notch / Dynamic Island */
+      padding-top: env(safe-area-inset-top);
     }
 
     /* HEADER */
@@ -27,12 +29,6 @@
       align-items: center;
       gap: 12px;
       box-shadow: 0 2px 8px rgba(13,71,161,0.3);
-      flex-shrink: 0;
-    }
-
-    .header-logo {
-      width: 40px;
-      height: 40px;
       flex-shrink: 0;
     }
 
@@ -72,7 +68,7 @@
 
     .back-btn:hover { background: rgba(255,255,255,0.28); }
 
-    /* CHAT IFRAME */
+    /* CHAT IFRAME — offset to hide Copilot Studio title bar */
     .chat-container {
       flex: 1;
       overflow: hidden;
@@ -81,8 +77,10 @@
 
     .chat-container iframe {
       width: 100%;
-      height: 100%;
+      height: calc(100% + 52px);
+      margin-top: -52px;
       border: none;
+      display: block;
     }
 
     /* FOOTER DISCLAIMER */
@@ -90,6 +88,7 @@
       background: #EEF4FB;
       border-top: 1px solid #D0E3F5;
       padding: 8px 16px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
       text-align: center;
       flex-shrink: 0;
     }
@@ -100,11 +99,7 @@
       line-height: 1.5;
     }
 
-    /* HEXAGON LOGO SVG */
-    .hex-logo {
-      width: 40px;
-      height: 40px;
-    }
+    .hex-logo { width: 40px; height: 40px; }
   </style>
 </head>
 <body>
@@ -112,18 +107,18 @@
   <!-- HEADER -->
   <div class="header">
     <svg class="hex-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" 
+      <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5"
                fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
-      <polygon points="50,18 80,34.5 80,65.5 50,82 20,65.5 20,34.5" 
+      <polygon points="50,18 80,34.5 80,65.5 50,82 20,65.5 20,34.5"
                fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
       <circle cx="50" cy="50" r="14" fill="rgba(255,255,255,0.95)"/>
-      <text x="50" y="55" text-anchor="middle" font-size="13" font-weight="900" 
+      <text x="50" y="55" text-anchor="middle" font-size="13" font-weight="900"
             fill="#1565C0" font-family="Arial, sans-serif">E</text>
     </svg>
 
     <div class="header-text">
       <div class="header-title">Ask EDDIE — Colon</div>
-      <div class="header-subtitle">Colon Cancer Screening & Risk Companion</div>
+      <div class="header-subtitle">Colon Cancer Screening &amp; Risk Companion</div>
     </div>
 
     <a class="back-btn" onclick="window.location.href='eddie-colon-risk.html'">
@@ -133,7 +128,7 @@
 
   <!-- CHAT IFRAME -->
   <div class="chat-container">
-    <iframe 
+    <iframe
       src="https://copilotstudio.microsoft.com/environments/Default-55392b7f-41f9-468a-8aae-c256bc68afe5/bots/cr21a_eddieColonCancerGuide/webchat?__version__=2"
       frameborder="0"
       allow="microphone"
