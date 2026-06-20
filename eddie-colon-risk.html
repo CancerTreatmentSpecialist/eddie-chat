@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Eddie Colon Risk Assessment</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F4F8FA;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(13,71,161,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .hex-logo {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+    }
+
+    .header-text { flex: 1; }
+    .header-title { font-size: 16px; font-weight: 700; }
+    .header-subtitle { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+
+    /* PROGRESS */
+    .progress-bar {
+      background: #D0E3F5;
+      height: 4px;
+      border-radius: 2px;
+      margin: 0;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #1565C0, #42A5F5);
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 16px 4px;
+      font-size: 11px;
+      color: #5A7A96;
+      font-weight: 500;
+    }
+
+    /* SECTIONS */
+    .section {
+      background: white;
+      border-radius: 16px;
+      margin: 12px 16px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(13,71,161,0.08);
+      display: none;
+    }
+
+    .section.active { display: block; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #EEF4FB;
+    }
+
+    .section-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1565C0, #42A5F5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .section-title { font-size: 16px; font-weight: 700; color: #1A3550; }
+    .section-subtitle { font-size: 11px; color: #7A95A8; margin-top: 2px; }
+
+    /* QUESTIONS */
+    .question { margin-bottom: 22px; }
+
+    .question-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1A3550;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .question-hint {
+      font-size: 11px;
+      color: #7A95A8;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    /* SLIDER */
+    .slider-container { padding: 4px 0; }
+
+    .age-display {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 800;
+      color: #1565C0;
+      margin-bottom: 8px;
+    }
+
+    .age-display span { font-size: 14px; font-weight: 500; color: #7A95A8; }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #1565C0 0%, #D0E3F5 0%);
+      outline: none;
+      -webkit-appearance: none;
+      margin: 8px 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #1565C0;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(21,101,192,0.4);
+      border: 3px solid white;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #7A95A8;
+    }
+
+    /* OPTION BUTTONS */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .options-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+    .options-grid.single { grid-template-columns: 1fr; }
+
+    .option-btn {
+      padding: 12px 10px;
+      border: 2px solid #D0E3F5;
+      border-radius: 12px;
+      background: white;
+      color: #1A3550;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      line-height: 1.3;
+    }
+
+    .option-btn:hover { border-color: #1565C0; background: #EEF4FB; }
+    .option-btn.selected { border-color: #1565C0; background: #1565C0; color: white; }
+
+    /* CHECKBOXES */
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border: 2px solid #D0E3F5;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checkbox-item:hover { border-color: #1565C0; background: #EEF4FB; }
+    .checkbox-item.checked { border-color: #1565C0; background: #EEF4FB; }
+
+    .checkbox-box {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #D0E3F5;
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+      transition: all 0.2s;
+    }
+
+    .checkbox-item.checked .checkbox-box {
+      background: #1565C0;
+      border-color: #1565C0;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .checkbox-text { font-size: 13px; color: #1A3550; font-weight: 500; line-height: 1.4; }
+    .checkbox-sub { font-size: 11px; color: #7A95A8; margin-top: 2px; }
+
+    /* NAVIGATION BUTTONS */
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      padding: 16px;
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+
+    .btn-back {
+      flex: 1;
+      padding: 14px;
+      border: 2px solid #D0E3F5;
+      border-radius: 14px;
+      background: white;
+      color: #1565C0;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-next {
+      flex: 2;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1565C0, #0D47A1);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(13,71,161,0.3);
+    }
+
+    /* RESULTS */
+    .results-card {
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .results-card.screening-eligible {
+      background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+      border: 2px solid #4CAF50;
+    }
+
+    .results-card.screening-not-eligible {
+      background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+      border: 2px solid #1565C0;
+    }
+
+    .results-card.high-risk {
+      background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+      border: 2px solid #E53935;
+    }
+
+    .results-card.moderate-risk {
+      background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+      border: 2px solid #FB8C00;
+    }
+
+    .results-card.low-risk {
+      background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+      border: 2px solid #43A047;
+    }
+
+    .results-icon { font-size: 40px; margin-bottom: 8px; }
+    .results-title { font-size: 20px; font-weight: 800; color: #1A3550; margin-bottom: 6px; }
+    .results-subtitle { font-size: 13px; color: #3A5570; line-height: 1.5; }
+
+    .risk-score {
+      font-size: 48px;
+      font-weight: 900;
+      margin: 8px 0;
+    }
+
+    .risk-score.low { color: #43A047; }
+    .risk-score.moderate { color: #FB8C00; }
+    .risk-score.high { color: #E53935; }
+
+    .recommendations {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(13,71,161,0.08);
+    }
+
+    .recommendations h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1A3550;
+      margin-bottom: 12px;
+    }
+
+    .rec-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .rec-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1565C0;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .rec-text { font-size: 13px; color: #3A5570; line-height: 1.5; }
+
+    .chat-btn {
+      width: calc(100% - 32px);
+      margin: 0 16px 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, #1565C0, #0D47A1);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(13,71,161,0.35);
+    }
+
+    .restart-btn {
+      width: calc(100% - 32px);
+      margin: 0 16px 24px;
+      padding: 14px;
+      background: white;
+      color: #1565C0;
+      border: 2px solid #D0E3F5;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .disclaimer {
+      margin: 0 16px 24px;
+      font-size: 10px;
+      color: #7A95A8;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .hidden { display: none !important; }
+
+    /* COLONOSCOPY INFO BOX */
+    .info-box {
+      background: #EEF4FB;
+      border-left: 4px solid #1565C0;
+      border-radius: 0 10px 10px 0;
+      padding: 12px 14px;
+      margin-top: 12px;
+    }
+
+    .info-box p { font-size: 12px; color: #3A5570; line-height: 1.5; }
+    .info-box strong { color: #1565C0; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <svg class="hex-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5"
+             fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+    <polygon points="50,18 80,34.5 80,65.5 50,82 20,65.5 20,34.5"
+             fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+    <circle cx="50" cy="50" r="14" fill="rgba(255,255,255,0.95)"/>
+    <text x="50" y="55" text-anchor="middle" font-size="13" font-weight="900"
+          fill="#1565C0" font-family="Arial, sans-serif">E</text>
+  </svg>
+  <div class="header-text">
+    <div class="header-title">Eddie Colon Risk Assessment</div>
+    <div class="header-subtitle">Colon Cancer Screening & Risk Companion</div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-label">
+  <span id="section-label">Section 1 of 4</span>
+  <span id="progress-pct">25%</span>
+</div>
+<div class="progress-bar">
+  <div class="progress-fill" id="progress-fill" style="width: 25%"></div>
+</div>
+
+<!-- SECTION 1: ABOUT YOU -->
+<div class="section active" id="section-1">
+  <div class="section-header">
+    <div class="section-icon">👤</div>
+    <div>
+      <div class="section-title">Section 1 — About You</div>
+      <div class="section-subtitle">Basic information used in screening guidelines</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">What is your age?</div>
+    <div class="slider-container">
+      <div class="age-display"><span id="age-val">45</span> <span>years old</span></div>
+      <input type="range" id="age-slider" min="18" max="90" value="45"
+             oninput="updateAge(this.value)" />
+      <div class="slider-labels"><span>18</span><span>90+</span></div>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">What is your biological sex?</div>
+    <div class="options-grid">
+      <button class="option-btn" onclick="selectOption(this, 'sex')">Male</button>
+      <button class="option-btn" onclick="selectOption(this, 'sex')">Female</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">What is your race/ethnicity?</div>
+    <div class="question-hint">African Americans have a higher risk of colorectal cancer and are recommended to start screening at age 45</div>
+    <div class="options-grid single">
+      <button class="option-btn" onclick="selectOption(this, 'race')">White / Caucasian</button>
+      <button class="option-btn" onclick="selectOption(this, 'race')">Black / African American</button>
+      <button class="option-btn" onclick="selectOption(this, 'race')">Hispanic / Latino</button>
+      <button class="option-btn" onclick="selectOption(this, 'race')">Asian / Pacific Islander</button>
+      <button class="option-btn" onclick="selectOption(this, 'race')">Other / Prefer not to say</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: FAMILY & PERSONAL HISTORY -->
+<div class="section" id="section-2">
+  <div class="section-header">
+    <div class="section-icon">🧬</div>
+    <div>
+      <div class="section-title">Section 2 — Family & Personal History</div>
+      <div class="section-subtitle">Family history significantly increases risk</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">Has a first-degree relative (parent, sibling, or child) been diagnosed with colorectal cancer or polyps?</div>
+    <div class="options-grid three">
+      <button class="option-btn" onclick="selectOption(this, 'family-crc')">Yes</button>
+      <button class="option-btn" onclick="selectOption(this, 'family-crc')">No</button>
+      <button class="option-btn" onclick="selectOption(this, 'family-crc')">Don't know</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">Have you personally ever been diagnosed with colorectal polyps?</div>
+    <div class="options-grid three">
+      <button class="option-btn" onclick="selectOption(this, 'personal-polyps')">Yes</button>
+      <button class="option-btn" onclick="selectOption(this, 'personal-polyps')">No</button>
+      <button class="option-btn" onclick="selectOption(this, 'personal-polyps')">Don't know</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">Have you ever been diagnosed with Inflammatory Bowel Disease (IBD), Crohn's disease, or Ulcerative Colitis?</div>
+    <div class="options-grid three">
+      <button class="option-btn" onclick="selectOption(this, 'ibd')">Yes</button>
+      <button class="option-btn" onclick="selectOption(this, 'ibd')">No</button>
+      <button class="option-btn" onclick="selectOption(this, 'ibd')">Don't know</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">Do you have a known hereditary syndrome?</div>
+    <div class="question-hint">Lynch syndrome, FAP (Familial Adenomatous Polyposis), or other hereditary colorectal cancer syndromes</div>
+    <div class="options-grid three">
+      <button class="option-btn" onclick="selectOption(this, 'hereditary')">Yes</button>
+      <button class="option-btn" onclick="selectOption(this, 'hereditary')">No</button>
+      <button class="option-btn" onclick="selectOption(this, 'hereditary')">Don't know</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">Have you ever been diagnosed with Type 2 Diabetes?</div>
+    <div class="options-grid three">
+      <button class="option-btn" onclick="selectOption(this, 'diabetes')">Yes</button>
+      <button class="option-btn" onclick="selectOption(this, 'diabetes')">No</button>
+      <button class="option-btn" onclick="selectOption(this, 'diabetes')">Don't know</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: LIFESTYLE FACTORS -->
+<div class="section" id="section-3">
+  <div class="section-header">
+    <div class="section-icon">🏃</div>
+    <div>
+      <div class="section-title">Section 3 — Lifestyle Factors</div>
+      <div class="section-subtitle">Modifiable factors that affect colorectal cancer risk</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">Do you currently smoke or use tobacco products?</div>
+    <div class="options-grid three">
+      <button class="option-btn" onclick="selectOption(this, 'smoking')">Yes</button>
+      <button class="option-btn" onclick="selectOption(this, 'smoking')">Former smoker</button>
+      <button class="option-btn" onclick="selectOption(this, 'smoking')">Never smoked</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">How would you describe your alcohol consumption?</div>
+    <div class="options-grid single">
+      <button class="option-btn" onclick="selectOption(this, 'alcohol')">None or rarely</button>
+      <button class="option-btn" onclick="selectOption(this, 'alcohol')">Moderate (1-2 drinks/day)</button>
+      <button class="option-btn" onclick="selectOption(this, 'alcohol')">Heavy (3+ drinks/day)</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">How would you describe your diet?</div>
+    <div class="options-grid single">
+      <button class="option-btn" onclick="selectOption(this, 'diet')">High in fruits, vegetables & fiber</button>
+      <button class="option-btn" onclick="selectOption(this, 'diet')">Moderate — mixed diet</button>
+      <button class="option-btn" onclick="selectOption(this, 'diet')">High in red/processed meat, low fiber</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">How would you describe your physical activity level?</div>
+    <div class="options-grid single">
+      <button class="option-btn" onclick="selectOption(this, 'activity')">Active (150+ min/week)</button>
+      <button class="option-btn" onclick="selectOption(this, 'activity')">Moderately active</button>
+      <button class="option-btn" onclick="selectOption(this, 'activity')">Sedentary / little exercise</button>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">How would you describe your body weight?</div>
+    <div class="options-grid three">
+      <button class="option-btn" onclick="selectOption(this, 'weight')">Healthy weight</button>
+      <button class="option-btn" onclick="selectOption(this, 'weight')">Overweight</button>
+      <button class="option-btn" onclick="selectOption(this, 'weight')">Obese</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: SYMPTOMS -->
+<div class="section" id="section-4">
+  <div class="section-header">
+    <div class="section-icon">🩺</div>
+    <div>
+      <div class="section-title">Section 4 — Symptoms</div>
+      <div class="section-subtitle">Current symptoms that may be relevant</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="question-label">Are you experiencing any of the following? (Select all that apply)</div>
+    <div id="symptoms-list">
+      <div class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"></div>
+        <div>
+          <div class="checkbox-text">Blood in stool or rectal bleeding</div>
+          <div class="checkbox-sub">Red or dark blood in stool or toilet</div>
+        </div>
+      </div>
+      <div class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"></div>
+        <div>
+          <div class="checkbox-text">Change in bowel habits</div>
+          <div class="checkbox-sub">Diarrhea, constipation, or narrowing of stool lasting more than a few days</div>
+        </div>
+      </div>
+      <div class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"></div>
+        <div>
+          <div class="checkbox-text">Feeling that bowel doesn't empty completely</div>
+        </div>
+      </div>
+      <div class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"></div>
+        <div>
+          <div class="checkbox-text">Unexplained abdominal pain or cramping</div>
+        </div>
+      </div>
+      <div class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"></div>
+        <div>
+          <div class="checkbox-text">Unexplained weight loss</div>
+        </div>
+      </div>
+      <div class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"></div>
+        <div>
+          <div class="checkbox-text">Unexplained fatigue or weakness</div>
+          <div class="checkbox-sub">May indicate anemia from chronic bleeding</div>
+        </div>
+      </div>
+      <div class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"></div>
+        <div>
+          <div class="checkbox-text">None of the above</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="question" style="margin-top: 16px;">
+      <div class="question-label">When was your last colorectal cancer screening?</div>
+      <div class="options-grid single">
+        <button class="option-btn" onclick="selectOption(this, 'last-screening')">Never had screening</button>
+        <button class="option-btn" onclick="selectOption(this, 'last-screening')">Within the last year</button>
+        <button class="option-btn" onclick="selectOption(this, 'last-screening')">1–5 years ago</button>
+        <button class="option-btn" onclick="selectOption(this, 'last-screening')">More than 5 years ago</button>
+        <button class="option-btn" onclick="selectOption(this, 'last-screening')">Don't remember</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS SECTION -->
+<div class="section" id="section-results">
+  <div id="screening-result"></div>
+  <div id="risk-result"></div>
+  <div id="recommendations-result"></div>
+</div>
+
+<!-- NAV BUTTONS -->
+<div class="nav-buttons" id="nav-buttons">
+  <button class="btn-back" id="btn-back" onclick="goBack()" style="display:none">← Back</button>
+  <button class="btn-next" id="btn-next" onclick="goNext()">Next →</button>
+</div>
+
+<button class="chat-btn hidden" id="ask-eddie-btn" onclick="window.location.href='eddie-colon-chat.html'">
+  💬 Ask EDDIE Your Questions
+</button>
+
+<button class="restart-btn hidden" id="restart-btn" onclick="restartAssessment()">
+  ↩ Start Over
+</button>
+
+<div class="disclaimer" id="footer-disclaimer">
+  Eddie Colon provides educational information only — not medical advice or diagnosis. Screening recommendations are based on USPSTF 2021 and ACG guidelines. Always consult a physician for personalized screening recommendations. All calculations are performed locally — this app does not collect or store any personal data. Conversations are processed by Microsoft Copilot Studio.
+</div>
+
+<script>
+  let currentSection = 1;
+  const totalSections = 4;
+  const answers = {};
+
+  function updateAge(val) {
+    document.getElementById('age-val').textContent = val;
+    answers.age = parseInt(val);
+    const pct = ((val - 18) / (90 - 18)) * 100;
+    document.getElementById('age-slider').style.background =
+      `linear-gradient(90deg, #1565C0 ${pct}%, #D0E3F5 ${pct}%)`;
+  }
+
+  function selectOption(btn, group) {
+    document.querySelectorAll(`[onclick*="'${group}'"]`).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    answers[group] = btn.textContent.trim();
+  }
+
+  function toggleCheck(item) {
+    item.classList.toggle('checked');
+    const box = item.querySelector('.checkbox-box');
+    box.textContent = item.classList.contains('checked') ? '✓' : '';
+  }
+
+  function updateProgress(section) {
+    const pct = (section / totalSections) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = Math.round(pct) + '%';
+    document.getElementById('section-label').textContent =
+      section <= totalSections ? `Section ${section} of ${totalSections}` : 'Results';
+  }
+
+  function goNext() {
+    if (currentSection < totalSections) {
+      document.getElementById(`section-${currentSection}`).classList.remove('active');
+      currentSection++;
+      document.getElementById(`section-${currentSection}`).classList.add('active');
+      document.getElementById('btn-back').style.display = 'block';
+      updateProgress(currentSection);
+      if (currentSection === totalSections) {
+        document.getElementById('btn-next').textContent = 'See My Results →';
+      }
+      window.scrollTo(0, 0);
+    } else {
+      showResults();
+    }
+  }
+
+  function goBack() {
+    if (currentSection > 1) {
+      document.getElementById(`section-${currentSection}`).classList.remove('active');
+      currentSection--;
+      document.getElementById(`section-${currentSection}`).classList.add('active');
+      updateProgress(currentSection);
+      if (currentSection === 1) document.getElementById('btn-back').style.display = 'none';
+      document.getElementById('btn-next').textContent = currentSection === totalSections ? 'See My Results →' : 'Next →';
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function calculateRisk() {
+    let score = 0;
+    const age = answers.age || 45;
+
+    // Age risk
+    if (age >= 75) score += 4;
+    else if (age >= 65) score += 3;
+    else if (age >= 50) score += 2;
+    else if (age >= 45) score += 1;
+
+    // Race
+    if (answers.race === 'Black / African American') score += 2;
+
+    // Family history
+    if (answers['family-crc'] === 'Yes') score += 4;
+
+    // Personal history
+    if (answers['personal-polyps'] === 'Yes') score += 3;
+    if (answers.ibd === 'Yes') score += 3;
+    if (answers.hereditary === 'Yes') score += 5;
+    if (answers.diabetes === 'Yes') score += 1;
+
+    // Lifestyle
+    if (answers.smoking === 'Yes') score += 2;
+    if (answers.smoking === 'Former smoker') score += 1;
+    if (answers.alcohol === 'Heavy (3+ drinks/day)') score += 2;
+    if (answers.alcohol === 'Moderate (1-2 drinks/day)') score += 1;
+    if (answers.diet === 'High in red/processed meat, low fiber') score += 2;
+    if (answers.weight === 'Obese') score += 2;
+    if (answers.weight === 'Overweight') score += 1;
+    if (answers.activity === 'Sedentary / little exercise') score += 1;
+
+    // Symptoms
+    const checked = document.querySelectorAll('.checkbox-item.checked');
+    if (checked.length > 0) {
+      const texts = Array.from(checked).map(c => c.querySelector('.checkbox-text').textContent);
+      if (texts.some(t => t.includes('Blood'))) score += 4;
+      if (texts.some(t => t.includes('weight loss'))) score += 3;
+      if (texts.some(t => t.includes('bowel habits'))) score += 2;
+    }
+
+    return score;
+  }
+
+  function showResults() {
+    answers.age = answers.age || parseInt(document.getElementById('age-slider').value);
+
+    document.getElementById(`section-${currentSection}`).classList.remove('active');
+    document.getElementById('section-results').classList.add('active');
+    document.getElementById('nav-buttons').classList.add('hidden');
+    document.getElementById('ask-eddie-btn').classList.remove('hidden');
+    document.getElementById('restart-btn').classList.remove('hidden');
+    document.getElementById('section-label').textContent = 'Results';
+    document.getElementById('progress-fill').style.width = '100%';
+    document.getElementById('progress-pct').textContent = '100%';
+
+    const score = calculateRisk();
+    const age = answers.age || 45;
+    const race = answers.race || '';
+    const hereditary = answers.hereditary === 'Yes';
+    const ibd = answers.ibd === 'Yes';
+    const familyHistory = answers['family-crc'] === 'Yes';
+    const personalPolyps = answers['personal-polyps'] === 'Yes';
+    const hasSymptoms = document.querySelectorAll('.checkbox-item.checked:not(:last-child)').length > 0;
+
+    // SCREENING ELIGIBILITY
+    let screeningHTML = '';
+    const eligible = age >= 45 && age <= 75;
+    const highRiskEarlyScreening = (race === 'Black / African American' && age >= 45) ||
+                                    hereditary || ibd || familyHistory || personalPolyps;
+
+    if (highRiskEarlyScreening && age < 45) {
+      screeningHTML = `
+        <div class="results-card screening-eligible">
+          <div class="results-icon">🔴</div>
+          <div class="results-title">High-Risk — Early Screening Recommended</div>
+          <div class="results-subtitle">Based on your personal or family history, your doctor may recommend colorectal cancer screening earlier than age 45. Discuss your risk with your physician immediately.</div>
+        </div>`;
+    } else if (eligible) {
+      screeningHTML = `
+        <div class="results-card screening-eligible">
+          <div class="results-icon">✅</div>
+          <div class="results-title">You May Qualify for Colorectal Cancer Screening</div>
+          <div class="results-subtitle">The USPSTF recommends colorectal cancer screening for adults aged <strong>45–75</strong>. At age ${age}, you are in the recommended screening age range. Talk to your doctor about which screening option is right for you.</div>
+          <div class="info-box" style="margin-top:12px; text-align:left;">
+            <p><strong>Screening Options Include:</strong><br>
+            • Colonoscopy every 10 years (gold standard)<br>
+            • Stool DNA test (Cologuard) every 1-3 years<br>
+            • FIT test (stool blood test) every year<br>
+            • CT colonography every 5 years</p>
+          </div>
+        </div>`;
+    } else if (age > 75) {
+      screeningHTML = `
+        <div class="results-card screening-not-eligible">
+          <div class="results-icon">ℹ️</div>
+          <div class="results-title">Discuss Screening with Your Doctor</div>
+          <div class="results-subtitle">The USPSTF recommends against routine screening for adults over 85. For adults 76-85, the decision should be individualized based on health status. Discuss with your physician.</div>
+        </div>`;
+    } else {
+      screeningHTML = `
+        <div class="results-card screening-not-eligible">
+          <div class="results-icon">📋</div>
+          <div class="results-title">Routine Screening Starts at Age 45</div>
+          <div class="results-subtitle">USPSTF guidelines recommend starting colorectal cancer screening at age 45. Focus on healthy lifestyle habits and discuss your family history with your doctor.</div>
+        </div>`;
+    }
+
+    // RISK LEVEL
+    let riskLevel, riskColor, riskLabel;
+    if (score >= 12 || hasSymptoms) {
+      riskLevel = 'high'; riskColor = '#E53935'; riskLabel = 'Higher Risk';
+    } else if (score >= 6) {
+      riskLevel = 'moderate'; riskColor = '#FB8C00'; riskLabel = 'Moderate Risk';
+    } else {
+      riskLevel = 'low'; riskColor = '#43A047'; riskLabel = 'Lower Risk';
+    }
+
+    const riskHTML = `
+      <div class="results-card ${riskLevel}-risk">
+        <div class="results-icon">${riskLevel === 'high' ? '🔴' : riskLevel === 'moderate' ? '🟡' : '🟢'}</div>
+        <div class="risk-score ${riskLevel}">${riskLabel}</div>
+        <div class="results-subtitle">Based on your responses, your assessed colorectal cancer risk profile is <strong>${riskLabel}</strong>. This is an educational estimate only — speak with your doctor for a personalized risk assessment.</div>
+      </div>`;
+
+    // RECOMMENDATIONS
+    const recs = [];
+
+    if (hasSymptoms) recs.push('⚠️ You reported symptoms that should be evaluated by a doctor promptly — do not delay seeking care.');
+    if (hereditary) recs.push('Your hereditary syndrome significantly increases risk — specialized surveillance colonoscopy schedule recommended.');
+    if (ibd) recs.push('Inflammatory bowel disease increases colorectal cancer risk — regular surveillance colonoscopy is recommended.');
+    if (familyHistory) recs.push('Family history of colorectal cancer means you should consider starting screening at age 40 or 10 years before your relative\'s diagnosis age.');
+    if (eligible) recs.push('Schedule your colorectal cancer screening with your doctor — colonoscopy is the gold standard test.');
+    if (answers.diet === 'High in red/processed meat, low fiber') recs.push('Increase dietary fiber, fruits, and vegetables. Reduce red and processed meat consumption.');
+    if (answers.smoking === 'Yes') recs.push('Smoking increases colorectal cancer risk. Talk to your doctor about smoking cessation resources.');
+    if (answers.alcohol === 'Heavy (3+ drinks/day)') recs.push('Heavy alcohol use is linked to increased colorectal cancer risk. Consider reducing alcohol consumption.');
+    if (answers.weight === 'Obese' || answers.activity === 'Sedentary / little exercise') recs.push('Regular physical activity and maintaining a healthy weight significantly reduce colorectal cancer risk.');
+    if (answers['last-screening'] === 'Never had screening' && age >= 45) recs.push('You have never had colorectal cancer screening — this is the most important step you can take today.');
+    if (answers['last-screening'] === 'More than 5 years ago') recs.push('It may be time for your next screening — contact your doctor to discuss when you are due.');
+
+    if (recs.length === 0) recs.push('Continue regular health check-ups and maintain a healthy lifestyle to reduce cancer risk.');
+
+    const recsHTML = `
+      <div class="recommendations">
+        <h3>📋 Personalized Recommendations</h3>
+        ${recs.map(r => `<div class="rec-item"><div class="rec-dot"></div><div class="rec-text">${r}</div></div>`).join('')}
+      </div>`;
+
+    document.getElementById('screening-result').innerHTML = screeningHTML;
+    document.getElementById('risk-result').innerHTML = riskHTML;
+    document.getElementById('recommendations-result').innerHTML = recsHTML;
+    window.scrollTo(0, 0);
+  }
+
+  function restartAssessment() {
+    location.reload();
+  }
+
+  // Initialize
+  updateAge(45);
+</script>
+
+</body>
+</html>
