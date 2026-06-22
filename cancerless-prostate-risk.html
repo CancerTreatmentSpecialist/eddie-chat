@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CancerLess — Prostate Cancer Risk Check</title>
+<style>
+  :root{
+    --bg:#ffffff; --ink:#1a2238; --muted:#5d6b85; --line:#e3e8f0;
+    --brand:#2bb3b3; --brand-deep:#1d8f8f; --brand-soft:#eafafa;
+    --warn-bg:#fff6ed; --warn-line:#f3d3a8; --warn-ink:#8a5a18;
+    --radius:16px; --shadow:0 6px 24px rgba(29,143,143,.10); font-size:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:520px;margin:0 auto;padding:20px 18px 40px}
+  .hero{text-align:center;padding:22px 16px 18px;background:linear-gradient(160deg,#eafafa 0%,#f3fbff 100%);border-radius:var(--radius);border:1px solid var(--line);margin-bottom:18px;}
+  .ribbon{width:38px;height:38px;margin:0 auto 8px;display:block}
+  .hero h1{font-size:1.35rem;line-height:1.25;margin:0 0 4px;font-weight:700;letter-spacing:-.01em}
+  .hero p{margin:0;color:var(--muted);font-size:.9rem}
+  .progress{display:flex;gap:6px;margin:18px 0 22px}
+  .progress span{flex:1;height:5px;border-radius:99px;background:var(--line);transition:background .3s}
+  .progress span.on{background:var(--brand)}
+  .step{display:none;animation:fade .35s ease}
+  .step.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .qnum{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-deep);font-weight:700;margin-bottom:6px}
+  .q{font-size:1.18rem;font-weight:650;margin:0 0 4px;letter-spacing:-.01em}
+  .hint{font-size:.85rem;color:var(--muted);margin:0 0 18px}
+  label.field{display:block;margin-bottom:14px}
+  input[type=number]{width:100%;padding:14px;font-size:1rem;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);appearance:none;transition:border-color .15s;}
+  input:focus{outline:none;border-color:var(--brand)}
+  .choices{display:grid;gap:10px}
+  .choices.cols2{grid-template-columns:1fr 1fr}
+  .choice{border:1.5px solid var(--line);border-radius:12px;padding:14px;font-size:.95rem;background:#fff;cursor:pointer;text-align:left;transition:.15s;font-weight:500;color:var(--ink);}
+  .choice:hover{border-color:var(--brand)}
+  .choice.sel{border-color:var(--brand);background:var(--brand-soft);font-weight:650}
+  .nav{display:flex;gap:10px;margin-top:24px}
+  button.btn{flex:1;padding:15px;border-radius:99px;font-size:1rem;font-weight:650;border:none;cursor:pointer;transition:.15s}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.primary:active{background:var(--brand-deep)}
+  .btn.primary:disabled{background:#bfe3e3;cursor:not-allowed}
+  .btn.ghost{flex:0 0 auto;padding:15px 22px;background:#fff;border:1.5px solid var(--line);color:var(--muted)}
+  .result-card{text-align:center;padding:30px 22px;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:16px;transition:background .3s,border-color .3s;}
+  .result-card.tier1{background:#f2fbfb;border-color:#cdeeee}
+  .result-card.tier2{background:#e2f6f6;border-color:#a5e0e0}
+  .result-card.tier3{background:#cdeeee;border-color:#6fcccc;box-shadow:0 6px 22px rgba(29,143,143,.18)}
+  .result-icon{width:46px;height:46px;margin:0 auto 14px;display:block}
+  .result-card.tier1 .result-icon path{stroke:#5bbcbc}
+  .result-card.tier2 .result-icon path{stroke:#2bb3b3}
+  .result-card.tier3 .result-icon path{stroke:#1d8f8f}
+  .result-headline{font-size:1.22rem;font-weight:700;line-height:1.35;letter-spacing:-.01em;color:var(--brand-deep);margin:0 0 4px}
+  .result-card.tier3 .result-headline{color:#176f6f}
+  .interp{font-size:.95rem;color:var(--ink);text-align:left;margin:18px 2px 0;line-height:1.6}
+  .ack-gate{border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;background:#fafdfd;margin-bottom:8px}
+  .ack-gate h3{font-size:1.05rem;margin:0 0 12px;font-weight:700}
+  .ack-body{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:18px}
+  .ack-body b{color:var(--ink)}
+  .ack-check{display:flex;align-items:flex-start;gap:11px;cursor:pointer;padding:14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;margin-bottom:16px;transition:.15s}
+  .ack-check.checked{border-color:var(--brand);background:var(--brand-soft)}
+  .ack-box{flex:0 0 auto;width:22px;height:22px;border:2px solid var(--muted);border-radius:6px;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.15s}
+  .ack-check.checked .ack-box{background:var(--brand);border-color:var(--brand)}
+  .ack-box svg{width:13px;height:13px;opacity:0;transition:.15s}
+  .ack-check.checked .ack-box svg{opacity:1}
+  .ack-label{font-size:.9rem;font-weight:600;line-height:1.45;color:var(--ink)}
+  .disclaimer{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn-ink);border-radius:12px;padding:13px 14px;font-size:.8rem;line-height:1.5;margin-top:18px}
+  .disclaimer b{color:var(--warn-ink)}
+  .footnote{font-size:.74rem;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
+  .restart{display:block;margin:18px auto 0;background:none;border:none;color:var(--brand-deep);font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:underline}
+  .err{color:#e07a4f;font-size:.82rem;margin-top:6px;min-height:1em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="ribbon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 21c-2.5-3-5-5.5-5-9.2A3.8 3.8 0 0 1 12 8.2a3.8 3.8 0 0 1 5 3.6c0 3.7-2.5 6.2-5 9.2Z" stroke="#7fb8e6" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M9.5 11.5 14 4M14.5 11.5 10 4" stroke="#7fb8e6" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <h1>Prostate Cancer Risk Check</h1>
+    <p>A few quick questions about your risk factors</p>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <!-- Q1 Age -->
+  <div class="step active" data-step="0">
+    <div class="qnum">Question 1</div>
+    <p class="q">What's your current age?</p>
+    <p class="hint">Prostate cancer risk rises with age. Screening discussions typically begin between 40 and 55 depending on risk.</p>
+    <label class="field"><input type="number" id="age" min="18" max="90" inputmode="numeric" placeholder="e.g. 55"></label>
+    <div class="err" id="err-age"></div>
+  </div>
+
+  <!-- Q2 Race -->
+  <div class="step" data-step="1">
+    <div class="qnum">Question 2</div>
+    <p class="q">Which best describes your race or ethnicity?</p>
+    <p class="hint">Black/African American men have a higher risk and are often advised to consider earlier screening conversations.</p>
+    <div class="choices" id="race-choices">
+      <button class="choice" data-val="white">White / Caucasian</button>
+      <button class="choice" data-val="black">Black / African American</button>
+      <button class="choice" data-val="hispanic">Hispanic / Latino</button>
+      <button class="choice" data-val="asian">Asian American / Pacific Islander</button>
+      <button class="choice" data-val="other">Other / Prefer not to say</button>
+    </div>
+  </div>
+
+  <!-- Q3 Family history -->
+  <div class="step" data-step="2">
+    <div class="qnum">Question 3</div>
+    <p class="q">Has a father, brother, or son had prostate cancer?</p>
+    <p class="hint">A first-degree relative with prostate cancer raises your risk.</p>
+    <div class="choices cols2" id="family-choices">
+      <button class="choice" data-val="0">No</button>
+      <button class="choice" data-val="1">One relative</button>
+      <button class="choice" data-val="2">Two or more</button>
+      <button class="choice" data-val="unknown">Not sure</button>
+    </div>
+  </div>
+
+  <!-- Q4 Genetic/BRCA or other strong history -->
+  <div class="step" data-step="3">
+    <div class="qnum">Question 4</div>
+    <p class="q">Any known BRCA gene mutation or strong family cancer history?</p>
+    <p class="hint">For example, a known BRCA1/BRCA2 mutation, or multiple relatives with breast, ovarian, or prostate cancer.</p>
+    <div class="choices cols2" id="genetic-choices">
+      <button class="choice" data-val="yes">Yes</button>
+      <button class="choice" data-val="no">No / not sure</button>
+    </div>
+  </div>
+
+  <!-- Q5 Symptoms (routes to clinician) -->
+  <div class="step" data-step="4">
+    <div class="qnum">Question 5</div>
+    <p class="q">Are you currently having any urinary symptoms?</p>
+    <p class="hint">For example: trouble urinating, weak stream, frequent nighttime urination, or blood in the urine. (Symptoms can have many causes — this is not a diagnosis.)</p>
+    <div class="choices cols2" id="symptom-choices">
+      <button class="choice" data-val="yes">Yes</button>
+      <button class="choice" data-val="no">No</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" data-step="5">
+    <div class="ack-gate" id="ackGate">
+      <h3>Before you see your guidance</h3>
+      <div class="ack-body">
+        This tool provides <b>general educational information only</b>. It is <b>not a medical diagnosis</b>, not a substitute for professional medical advice, and cannot tell you whether you do or do not have cancer. It does not replace screening or an evaluation by your doctor.
+      </div>
+      <div class="ack-check" id="ackCheck" onclick="toggleAck()">
+        <div class="ack-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="ack-label">I understand this is educational information only, not medical advice, and that I should talk with my doctor about screening and my health.</div>
+      </div>
+      <button class="btn primary" id="ackBtn" onclick="revealResult()" disabled style="width:100%">Show my guidance</button>
+    </div>
+
+    <div id="resultReveal" style="display:none">
+      <div class="result-card" id="resultCard">
+        <svg class="result-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 21c-2.5-3-5-5.5-5-9.2A3.8 3.8 0 0 1 12 8.2a3.8 3.8 0 0 1 5 3.6c0 3.7-2.5 6.2-5 9.2Z" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M9.5 11.5 14 4M14.5 11.5 10 4" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <div class="result-headline" id="headline">—</div>
+        <div class="interp" id="interp"></div>
+      </div>
+      <div class="disclaimer">
+        <b>About this guidance.</b> CancerLess uses general, peer-reviewed risk factors (age, race/ethnicity, and family history) drawn from AUA and USPSTF prostate cancer screening guidance. This is educational guidance for starting a conversation with your doctor — <b>not a diagnosis</b> and not a PSA test or screening result. Your doctor can discuss whether PSA screening is right for you.
+      </div>
+      <button class="restart" onclick="restart()">Start over</button>
+    </div>
+  </div>
+
+  <div class="nav" id="nav">
+    <button class="btn ghost" id="backBtn" onclick="back()" style="display:none">Back</button>
+    <button class="btn primary" id="nextBtn" onclick="next()">Continue</button>
+  </div>
+
+  <div class="footnote">CancerLess by Cancer Treatment Specialist, PC · For educational use only.<br>Not a substitute for professional medical advice.</div>
+</div>
+
+<script>
+const data={age:null,race:null,family:null,genetic:'no',symptom:'no'};
+let stepOrder=[0,1,2,3,4];
+let pos=0;
+const RESULT_STEP=5;
+
+function buildProgress(){const p=document.getElementById('progress');p.innerHTML='';stepOrder.forEach(()=>p.appendChild(document.createElement('span')));}
+function paintProgress(){document.querySelectorAll('#progress span').forEach((d,i)=>d.classList.toggle('on',i<=pos));}
+function showStep(s){document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));document.querySelector(`.step[data-step="${s}"]`).classList.add('active');document.getElementById('backBtn').style.display=pos>0?'block':'none';const isR=s===RESULT_STEP;document.getElementById('nav').style.display=isR?'none':'flex';if(!isR)document.getElementById('nextBtn').textContent=(pos===stepOrder.length-1)?'See my guidance':'Continue';paintProgress();window.scrollTo({top:0,behavior:'smooth'});}
+function currentStepId(){return stepOrder[pos];}
+function validateCurrent(){const id=currentStepId();if(id===0){const v=parseInt(document.getElementById('age').value,10);const e=document.getElementById('err-age');if(!v||v<18||v>90){e.textContent='Please enter an age between 18 and 90.';return false;}e.textContent='';data.age=v;return true;}const map={1:'race',2:'family',3:'genetic',4:'symptom'};if(data[map[id]]===null)return false;return true;}
+function next(){if(!validateCurrent())return;if(pos<stepOrder.length-1){pos++;showStep(currentStepId());}else{resetAck();compute();pos=stepOrder.length-1;showStep(RESULT_STEP);}updateNextState();}
+function back(){if(pos>0){pos--;showStep(currentStepId());updateNextState();}}
+function updateNextState(){const id=currentStepId();const btn=document.getElementById('nextBtn');if(id===0){btn.disabled=false;return;}const map={1:'race',2:'family',3:'genetic',4:'symptom'};btn.disabled=(data[map[id]]===null);}
+function wireChoices(cid,key){const c=document.getElementById(cid);c.querySelectorAll('.choice').forEach(b=>{b.addEventListener('click',()=>{c.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');data[key]=b.dataset.val;updateNextState();});});}
+wireChoices('race-choices','race');wireChoices('family-choices','family');wireChoices('genetic-choices','genetic');wireChoices('symptom-choices','symptom');
+document.getElementById('age').addEventListener('input',()=>document.getElementById('err-age').textContent='');
+
+/* ===== Risk engine — three-tier ACTION band, no number shown =====
+   Based on AUA/USPSTF prostate screening risk factors: age, Black race,
+   first-degree family history, BRCA/strong hereditary history, symptoms.
+   Tier 1 routine, Tier 2 discuss earlier/added screening, Tier 3 see clinician. */
+function compute(){
+  let score=0;
+  const age=data.age;
+  // age contribution
+  if(age>=70) score+=2; else if(age>=55) score+=2; else if(age>=45) score+=1;
+  // race
+  if(data.race==='black') score+=2;
+  // family history
+  const fam=data.family==='unknown'?0:parseInt(data.family,10);
+  score+=fam; // 0,1,2
+  // genetic/strong hereditary
+  if(data.genetic==='yes') score+=2;
+  // symptoms always route toward clinician
+  const symptomatic=(data.symptom==='yes');
+
+  let tier;
+  if(symptomatic || score>=4) tier=3;
+  else if(score>=2) tier=2;
+  else tier=1;
+
+  render(tier, symptomatic);
+}
+
+function render(tier, symptomatic){
+  const card=document.getElementById('resultCard');
+  const headline=document.getElementById('headline');
+  const interp=document.getElementById('interp');
+  card.className='result-card tier'+tier;
+
+  if(tier===1){
+    headline.textContent='Discuss continued routine screening with your doctor';
+    interp.innerHTML=`Based on the general factors you entered, talking with your doctor about routine prostate screening on the usual schedule is the right path. Risk is never zero, so keep that conversation going at your regular visits. The daily habits CancerLess tracks can support your overall health.`;
+  } else if(tier===2){
+    headline.textContent='Discuss added screening with your doctor';
+    interp.innerHTML=`Some of the factors you entered — such as age, family history, or background — are reasons to talk with your doctor about whether earlier or more frequent prostate screening makes sense for you. This is educational guidance, not a diagnosis. Your doctor can discuss whether PSA screening is right for you.`;
+  } else {
+    headline.textContent='Talk to your doctor about your elevated risk soon';
+    if(symptomatic){
+      interp.innerHTML=`You noted urinary symptoms and/or higher-risk factors. Urinary symptoms have many possible causes and are not a diagnosis, but they are a clear reason to see your doctor soon to discuss evaluation and screening. This tool is educational only — please connect with a clinician.`;
+    } else {
+      interp.innerHTML=`The factors you entered suggest it would be worthwhile to speak with a clinician soon about prostate screening and the right plan for you. This is educational guidance, not a diagnosis, but it's a clear reason to connect with your doctor.`;
+    }
+  }
+}
+
+let ackChecked=false;
+function toggleAck(){ackChecked=!ackChecked;document.getElementById('ackCheck').classList.toggle('checked',ackChecked);document.getElementById('ackBtn').disabled=!ackChecked;}
+function revealResult(){if(!ackChecked)return;document.getElementById('ackGate').style.display='none';document.getElementById('resultReveal').style.display='block';window.scrollTo({top:0,behavior:'smooth'});}
+function resetAck(){ackChecked=false;document.getElementById('ackCheck').classList.remove('checked');document.getElementById('ackBtn').disabled=true;document.getElementById('ackGate').style.display='block';document.getElementById('resultReveal').style.display='none';}
+
+function restart(){for(const k in data)data[k]=null;data.genetic='no';data.symptom='no';document.getElementById('age').value='';document.querySelectorAll('.choice').forEach(b=>b.classList.remove('sel'));stepOrder=[0,1,2,3,4];pos=0;resetAck();buildProgress();showStep(0);updateNextState();}
+
+buildProgress();showStep(0);updateNextState();resetAck();
+</script>
+</body>
+</html>
