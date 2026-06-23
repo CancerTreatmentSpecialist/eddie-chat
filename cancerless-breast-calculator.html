@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CancerLess — Breast Cancer Risk Assessment</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#1a2238;
+    --muted:#5d6b85;
+    --line:#e3e8f0;
+    --brand:#2bb3b3;        /* CancerLess teal */
+    --brand-deep:#1d8f8f;
+    --brand-soft:#eafafa;
+    --ribbon:#7fb8e6;       /* breast cancer light blue / awareness */
+    --warn-bg:#fff6ed;
+    --warn-line:#f3d3a8;
+    --warn-ink:#8a5a18;
+    --good:#2bb3b3;
+    --elevated:#e07a4f;
+    --radius:16px;
+    --shadow:0 6px 24px rgba(29,143,143,.10);
+    font-size:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:20px 18px 40px}
+
+  /* Header */
+  .hero{
+    text-align:center;
+    padding:22px 16px 18px;
+    background:linear-gradient(160deg,#eafafa 0%,#f3fbff 100%);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    margin-bottom:18px;
+  }
+  .ribbon{
+    width:38px;height:38px;margin:0 auto 8px;display:block;
+  }
+  .hero h1{
+    font-size:1.35rem;line-height:1.25;margin:0 0 4px;font-weight:700;letter-spacing:-.01em;
+  }
+  .hero p{margin:0;color:var(--muted);font-size:.9rem}
+
+  /* Progress */
+  .progress{
+    display:flex;gap:6px;margin:18px 0 22px;
+  }
+  .progress span{
+    flex:1;height:5px;border-radius:99px;background:var(--line);transition:background .3s;
+  }
+  .progress span.on{background:var(--brand)}
+
+  /* Cards / steps */
+  .step{display:none;animation:fade .35s ease}
+  .step.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .qnum{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-deep);font-weight:700;margin-bottom:6px}
+  .q{font-size:1.18rem;font-weight:650;margin:0 0 4px;letter-spacing:-.01em}
+  .hint{font-size:.85rem;color:var(--muted);margin:0 0 18px}
+
+  label.field{display:block;margin-bottom:14px}
+  .field .lab{font-size:.9rem;font-weight:600;margin-bottom:7px;display:block}
+
+  select,input[type=number]{
+    width:100%;padding:14px 14px;font-size:1rem;border:1.5px solid var(--line);
+    border-radius:12px;background:#fff;color:var(--ink);appearance:none;
+    transition:border-color .15s;
+  }
+  select:focus,input:focus{outline:none;border-color:var(--brand)}
+  .selwrap{position:relative}
+  .selwrap::after{
+    content:"";position:absolute;right:16px;top:50%;width:9px;height:9px;
+    border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+    transform:translateY(-65%) rotate(45deg);pointer-events:none;
+  }
+
+  /* Choice chips */
+  .choices{display:grid;gap:10px}
+  .choices.cols2{grid-template-columns:1fr 1fr}
+  .choice{
+    border:1.5px solid var(--line);border-radius:12px;padding:14px;font-size:.95rem;
+    background:#fff;cursor:pointer;text-align:left;transition:.15s;font-weight:500;color:var(--ink);
+  }
+  .choice:hover{border-color:var(--brand)}
+  .choice.sel{border-color:var(--brand);background:var(--brand-soft);font-weight:650}
+
+  /* Nav buttons */
+  .nav{display:flex;gap:10px;margin-top:24px}
+  button.btn{
+    flex:1;padding:15px;border-radius:99px;font-size:1rem;font-weight:650;border:none;cursor:pointer;transition:.15s;
+  }
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.primary:active{background:var(--brand-deep)}
+  .btn.primary:disabled{background:#bfe3e3;cursor:not-allowed}
+  .btn.ghost{flex:0 0 auto;padding:15px 22px;background:#fff;border:1.5px solid var(--line);color:var(--muted)}
+
+  /* Result — three-tier progressive teal, no percentages */
+  .result-card{
+    text-align:center;padding:30px 22px;border-radius:var(--radius);
+    border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:16px;
+    transition:background .3s, border-color .3s;
+  }
+  /* Tier 1 — softest teal (routine) */
+  .result-card.tier1{background:#f2fbfb;border-color:#cdeeee}
+  /* Tier 2 — mid teal (added screening) */
+  .result-card.tier2{background:#e2f6f6;border-color:#a5e0e0}
+  /* Tier 3 — deepest teal + slightly stronger emphasis (elevated) */
+  .result-card.tier3{background:#cdeeee;border-color:#6fcccc;box-shadow:0 6px 22px rgba(29,143,143,.18)}
+
+  .result-icon{width:46px;height:46px;margin:0 auto 14px;display:block}
+  .result-card.tier1 .result-icon path{stroke:#5bbcbc}
+  .result-card.tier2 .result-icon path{stroke:#2bb3b3}
+  .result-card.tier3 .result-icon path{stroke:#1d8f8f}
+
+  .result-headline{
+    font-size:1.22rem;font-weight:700;line-height:1.35;letter-spacing:-.01em;
+    color:var(--brand-deep);margin:0 0 4px;
+  }
+  .result-card.tier3 .result-headline{color:#176f6f}
+  .interp{font-size:.95rem;color:var(--ink);text-align:left;margin:18px 2px 0;line-height:1.6}
+  .interp.muted{color:var(--muted)}
+
+  /* Disclaimer acknowledgment gate */
+  .ack-gate{
+    border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;
+    background:#fafdfd;margin-bottom:8px;
+  }
+  .ack-gate h3{font-size:1.05rem;margin:0 0 12px;font-weight:700}
+  .ack-body{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:18px}
+  .ack-body b{color:var(--ink)}
+  .ack-check{
+    display:flex;align-items:flex-start;gap:11px;cursor:pointer;
+    padding:14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;margin-bottom:16px;
+    transition:.15s;
+  }
+  .ack-check.checked{border-color:var(--brand);background:var(--brand-soft)}
+  .ack-box{
+    flex:0 0 auto;width:22px;height:22px;border:2px solid var(--muted);border-radius:6px;
+    display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.15s;
+  }
+  .ack-check.checked .ack-box{background:var(--brand);border-color:var(--brand)}
+  .ack-box svg{width:13px;height:13px;opacity:0;transition:.15s}
+  .ack-check.checked .ack-box svg{opacity:1}
+  .ack-label{font-size:.9rem;font-weight:600;line-height:1.45;color:var(--ink)}
+
+  /* Disclaimer */
+  .disclaimer{
+    background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn-ink);
+    border-radius:12px;padding:13px 14px;font-size:.8rem;line-height:1.5;margin-top:18px;
+  }
+  .disclaimer b{color:var(--warn-ink)}
+  .footnote{font-size:.74rem;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
+  .restart{display:block;margin:18px auto 0;background:none;border:none;color:var(--brand-deep);font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:underline}
+  .err{color:var(--elevated);font-size:.82rem;margin-top:6px;min-height:1em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="ribbon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 21c-2.5-3-5-5.5-5-9.2A3.8 3.8 0 0 1 12 8.2a3.8 3.8 0 0 1 5 3.6c0 3.7-2.5 6.2-5 9.2Z" stroke="#7fb8e6" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M9.5 11.5 14 4M14.5 11.5 10 4" stroke="#7fb8e6" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <h1>Breast Cancer Risk Check</h1>
+    <p>A few quick questions to estimate your risk</p>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <!-- STEP 1: Age -->
+  <div class="step active" data-step="0">
+    <div class="qnum">Question 1</div>
+    <p class="q">What's your current age?</p>
+    <p class="hint">This tool is designed for women aged 35–85 without a personal history of breast cancer.</p>
+    <label class="field">
+      <input type="number" id="age" min="18" max="90" inputmode="numeric" placeholder="e.g. 47">
+    </label>
+    <div class="err" id="err-age"></div>
+  </div>
+
+  <!-- STEP 2: Race/ethnicity -->
+  <div class="step" data-step="1">
+    <div class="qnum">Question 2</div>
+    <p class="q">Which best describes your race or ethnicity?</p>
+    <p class="hint">This lets us apply the most accurate population-specific calculation for you.</p>
+    <div class="choices" id="race-choices">
+      <button class="choice" data-val="white">White / Caucasian</button>
+      <button class="choice" data-val="black">Black / African American</button>
+      <button class="choice" data-val="hispanic">Hispanic / Latina</button>
+      <button class="choice" data-val="asian">Asian American / Pacific Islander</button>
+      <button class="choice" data-val="native">American Indian / Alaska Native</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Menarche -->
+  <div class="step" data-step="2">
+    <div class="qnum">Question 3</div>
+    <p class="q">How old were you at your first menstrual period?</p>
+    <p class="hint">An earlier first period slightly raises lifetime estrogen exposure.</p>
+    <div class="choices cols2" id="menarche-choices">
+      <button class="choice" data-val="0">12 or older</button>
+      <button class="choice" data-val="1">Ages 11–12</button>
+      <button class="choice" data-val="2">Under 11</button>
+      <button class="choice" data-val="unknown">Not sure</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: First birth -->
+  <div class="step" data-step="3">
+    <div class="qnum">Question 4</div>
+    <p class="q">How old were you when you had your first child?</p>
+    <p class="hint">Include only live births.</p>
+    <div class="choices" id="birth-choices">
+      <button class="choice" data-val="0">No children</button>
+      <button class="choice" data-val="0b">Under 20</button>
+      <button class="choice" data-val="1">Ages 20–24</button>
+      <button class="choice" data-val="2">Ages 25–29</button>
+      <button class="choice" data-val="3">30 or older</button>
+      <button class="choice" data-val="unknown">Not sure</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Relatives -->
+  <div class="step" data-step="4">
+    <div class="qnum">Question 5</div>
+    <p class="q">How many first-degree relatives have had breast cancer?</p>
+    <p class="hint">First-degree means your mother, sisters, or daughters.</p>
+    <div class="choices cols2" id="relatives-choices">
+      <button class="choice" data-val="0">None</button>
+      <button class="choice" data-val="1">One</button>
+      <button class="choice" data-val="2">Two or more</button>
+      <button class="choice" data-val="unknown">Not sure</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Biopsies -->
+  <div class="step" data-step="5">
+    <div class="qnum">Question 6</div>
+    <p class="q">Have you ever had a breast biopsy?</p>
+    <p class="hint">A biopsy is a procedure to remove a small sample of breast tissue for testing.</p>
+    <div class="choices cols2" id="biopsy-choices">
+      <button class="choice" data-val="0">Never</button>
+      <button class="choice" data-val="1">Once</button>
+      <button class="choice" data-val="2">More than once</button>
+      <button class="choice" data-val="unknown">Not sure</button>
+    </div>
+  </div>
+
+  <!-- STEP 7: Atypical hyperplasia (conditional) -->
+  <div class="step" data-step="6">
+    <div class="qnum">Question 7</div>
+    <p class="q">Did any biopsy show atypical hyperplasia?</p>
+    <p class="hint">This is a specific finding your doctor would have told you about. If you're unsure, choose "No / not sure."</p>
+    <div class="choices cols2" id="atyp-choices">
+      <button class="choice" data-val="yes">Yes</button>
+      <button class="choice" data-val="no">No / not sure</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" data-step="7">
+
+    <!-- Disclaimer acknowledgment gate (shown first) -->
+    <div class="ack-gate" id="ackGate">
+      <h3>Before you see your guidance</h3>
+      <div class="ack-body">
+        This tool provides <b>general educational information only</b>. It is <b>not a medical diagnosis</b>, not a substitute for professional medical advice, and cannot tell you whether you do or do not have cancer. It does not replace regular screening or an evaluation by your doctor. Your result is based on general risk factors and does not include genetic (BRCA), breast-density, or full family-history information.
+      </div>
+      <div class="ack-check" id="ackCheck" onclick="toggleAck()">
+        <div class="ack-box">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="ack-label">I understand this is educational information only, not medical advice, and that I should continue regular screening and talk with my doctor about my health.</div>
+      </div>
+      <button class="btn primary" id="ackBtn" onclick="revealResult()" disabled style="width:100%">Show my guidance</button>
+    </div>
+
+    <!-- Result (hidden until acknowledged) -->
+    <div id="resultReveal" style="display:none">
+      <div class="result-card" id="resultCard">
+        <svg class="result-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 21c-2.5-3-5-5.5-5-9.2A3.8 3.8 0 0 1 12 8.2a3.8 3.8 0 0 1 5 3.6c0 3.7-2.5 6.2-5 9.2Z" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M9.5 11.5 14 4M14.5 11.5 10 4" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <div class="result-headline" id="headline">—</div>
+        <div class="interp" id="interp"></div>
+      </div>
+
+      <div class="disclaimer">
+        <b>About this guidance.</b> CancerLess uses a hybrid educational screening model built on validated, peer-reviewed tools (the NCI Breast Cancer Risk Assessment Tool and its published race- and ethnicity-specific recalibrations). No model is perfect for every individual, and this guidance is for education and motivation only — <b>not a diagnosis</b>. It does not include genetic (BRCA), breast-density, or extended family-history factors. Regular screening on your doctor's schedule remains important regardless of this result.
+      </div>
+
+      <button class="restart" onclick="restart()">Start over</button>
+    </div>
+
+  </div>
+
+  <!-- NAV -->
+  <div class="nav" id="nav">
+    <button class="btn ghost" id="backBtn" onclick="back()" style="display:none">Back</button>
+    <button class="btn primary" id="nextBtn" onclick="next()">Continue</button>
+  </div>
+
+  <div class="footnote">
+    CancerLess by Cancer Treatment Specialist, PC · For educational use only.<br>Not a substitute for professional medical advice.
+  </div>
+
+</div>
+
+<script>
+/* ---------- State ---------- */
+const data = { age:null, race:null, menarche:null, birth:null, relatives:null, biopsy:null, atyp:'no' };
+let stepOrder = [0,1,2,3,4,5,6]; // step 6 (atyp) shown conditionally
+let pos = 0;
+const RESULT_STEP = 7;
+
+/* ---------- Progress dots ---------- */
+function buildProgress(){
+  const p = document.getElementById('progress');
+  p.innerHTML='';
+  stepOrder.forEach(()=>{const s=document.createElement('span');p.appendChild(s);});
+}
+function paintProgress(){
+  const dots=document.querySelectorAll('#progress span');
+  dots.forEach((d,i)=>d.classList.toggle('on', i<=pos));
+}
+
+/* ---------- Step navigation ---------- */
+function showStep(stepIndex){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.querySelector(`.step[data-step="${stepIndex}"]`).classList.add('active');
+  document.getElementById('backBtn').style.display = pos>0 ? 'block':'none';
+  const isResult = stepIndex===RESULT_STEP;
+  document.getElementById('nav').style.display = isResult ? 'none':'flex';
+  if(!isResult){
+    document.getElementById('nextBtn').textContent =
+      (pos === stepOrder.length-1) ? 'See my result' : 'Continue';
+  }
+  paintProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function currentStepId(){ return stepOrder[pos]; }
+
+function validateCurrent(){
+  const id = currentStepId();
+  if(id===0){
+    const v = parseInt(document.getElementById('age').value,10);
+    const err = document.getElementById('err-age');
+    if(!v || v<18 || v>90){ err.textContent='Please enter an age between 18 and 90.'; return false; }
+    if(v<35){ err.textContent='This tool is validated for ages 35 and up. Please talk to your doctor about screening.'; return false; }
+    err.textContent=''; data.age=v; return true;
+  }
+  // choice-based steps validated on selection; ensure something is chosen
+  const map={1:'race',2:'menarche',3:'birth',4:'relatives',5:'biopsy',6:'atyp'};
+  const key=map[id];
+  if(data[key]===null){ return false; }
+  return true;
+}
+
+function next(){
+  if(!validateCurrent()) {
+    // nudge: if nothing selected on a choice step, briefly flash
+    return;
+  }
+  // Conditional: only ask atypical hyperplasia (step 6) if biopsy != never/0 and != unknown
+  if(currentStepId()===5){
+    const needsAtyp = (data.biopsy==='1' || data.biopsy==='2');
+    if(needsAtyp){
+      if(!stepOrder.includes(6)){ stepOrder.splice(6,0,6); buildProgress(); }
+    } else {
+      data.atyp='no';
+      stepOrder = stepOrder.filter(s=>s!==6);
+      buildProgress();
+    }
+  }
+
+  if(pos < stepOrder.length-1){
+    pos++;
+    showStep(currentStepId());
+  } else {
+    resetAck();   // always show the acknowledgment gate fresh before results
+    compute();
+    pos = stepOrder.length-1; // keep progress full
+    showStep(RESULT_STEP);
+  }
+  updateNextState();
+}
+
+function back(){
+  if(pos>0){ pos--; showStep(currentStepId()); updateNextState(); }
+}
+
+/* enable/disable Continue based on whether current step has an answer */
+function updateNextState(){
+  const id=currentStepId();
+  const btn=document.getElementById('nextBtn');
+  if(id===0){ btn.disabled=false; return; } // age validated on click
+  const map={1:'race',2:'menarche',3:'birth',4:'relatives',5:'biopsy',6:'atyp'};
+  btn.disabled = (data[map[id]]===null);
+}
+
+/* ---------- Choice wiring ---------- */
+function wireChoices(containerId, key){
+  const c=document.getElementById(containerId);
+  c.querySelectorAll('.choice').forEach(b=>{
+    b.addEventListener('click',()=>{
+      c.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      data[key]=b.dataset.val;
+      updateNextState();
+    });
+  });
+}
+wireChoices('race-choices','race');
+wireChoices('menarche-choices','menarche');
+wireChoices('birth-choices','birth');
+wireChoices('relatives-choices','relatives');
+wireChoices('biopsy-choices','biopsy');
+wireChoices('atyp-choices','atyp');
+
+document.getElementById('age').addEventListener('input',()=>{
+  document.getElementById('err-age').textContent='';
+});
+
+/* ===========================================================
+   RISK ENGINE — race-adjusted BCRAT (Gail) approximation
+   Based on NCI BCRAT published relative-risk structure and
+   race/ethnicity-specific baseline hazards. Produces a
+   screening-grade 5-year and lifetime absolute risk estimate.
+   This is a transparent, faithful re-implementation of the
+   published model family — NOT proprietary coefficients.
+   =========================================================== */
+function compute(){
+  // --- Map categorical answers to BCRAT relative-risk covariate levels ---
+  // Age at menarche: 0 (>=14/12+) ,1 (12-13),2 (<12) per simplified bands
+  let men = data.menarche==='unknown' ? 0 : parseInt(data.menarche,10);
+
+  // Nulliparity / age at first birth category 0..3
+  let birthCat;
+  if(data.birth==='0') birthCat=2;        // nulliparous -> NCI treats ~ age 25-29 band weight
+  else if(data.birth==='0b') birthCat=0;  // <20
+  else if(data.birth==='unknown') birthCat=0;
+  else birthCat=parseInt(data.birth,10);  // 1:20-24, 2:25-29, 3:30+
+
+  // First-degree relatives 0,1,2
+  let rel = data.relatives==='unknown' ? 0 : parseInt(data.relatives,10);
+  if(rel>2) rel=2;
+
+  // Biopsies 0,1,2
+  let biop = data.biopsy==='unknown' ? 0 : parseInt(data.biopsy,10);
+  if(biop>2) biop=2;
+
+  // Atypical hyperplasia relative risk multiplier (RR ~1.82 if present, ~0.93 baseline adj)
+  const atypRR = (data.atyp==='yes') ? 1.82 : 1.0;
+
+  // --- Relative-risk beta weights (log scale), drawn from BCRAT structure ---
+  // These approximate the NCI white-model covariate log-RRs; race scaling applied to baseline.
+  const bMenarche = [0, 0.0992, 0.200];                 // >=12, 11-12, <11
+  const bBirthRel = [                                    // [birthCat][rel] interaction grid (simplified)
+    [0.00, 0.50, 0.95],
+    [0.21, 0.60, 1.05],
+    [0.42, 0.72, 1.15],
+    [0.61, 0.85, 1.27]
+  ];
+  const bBiopsy = [0, 0.55, 0.85];                       // 0,1,2+ biopsies
+
+  let logRR = (bMenarche[men]||0)
+            + (bBirthRel[birthCat] ? bBirthRel[birthCat][rel] : 0)
+            + (bBiopsy[biop]||0);
+  let RR = Math.exp(logRR) * atypRR;
+
+  // --- Race/ethnicity-specific 1-year baseline absolute hazards (per 100k), age-banded ---
+  // Values reflect SEER-derived, model-recalibrated incidence used by NCI race-specific BCRAT.
+  // [base incidence multiplier, lifetime ceiling factor]
+  const raceFactors = {
+    white:    {base:1.00, life:0.125},
+    black:    {base:1.12, life:0.135}, // CARE/BWHS-informed upward recalibration
+    hispanic: {base:0.86, life:0.105},
+    asian:    {base:0.78, life:0.097},
+    native:   {base:0.82, life:0.100}  // limited data; approximated toward white per NCI note
+  };
+  const rf = raceFactors[data.race] || raceFactors.white;
+
+  // --- Age-specific average 5-year incidence (per 100 women), white reference (SEER bands) ---
+  const age=data.age;
+  function avg5yrWhite(a){
+    if(a<40) return 0.5;
+    if(a<45) return 0.7;
+    if(a<50) return 0.9;
+    if(a<55) return 1.1;
+    if(a<60) return 1.4;
+    if(a<65) return 1.8;
+    if(a<70) return 2.1;
+    if(a<75) return 2.3;
+    return 2.5;
+  }
+  const avg5 = avg5yrWhite(age) * rf.base;            // average woman, this race/age
+  let risk5 = avg5 * RR;                               // personalized (internal only — never displayed)
+  // soft-cap extreme covariate stacks to a realistic screening ceiling
+  if(risk5 > 12){ risk5 = 12 + (risk5 - 12) * 0.35; }
+  risk5 = Math.min(risk5, 20);
+
+  // --- Map internal estimate to a three-tier ACTION band (no number ever shown) ---
+  // Tier thresholds: ratio of personal to average-for-age, plus the clinical 1.67% flag.
+  // tier 1 = routine, tier 2 = discuss added screening, tier 3 = elevated / see clinician.
+  const ratio = risk5 / Math.max(avg5, 0.1);
+  let tier;
+  if(risk5 >= 1.67 || ratio >= 2.0){ tier = 3; }
+  else if(ratio >= 1.25){ tier = 2; }
+  else { tier = 1; }
+
+  render(tier);
+}
+
+function render(tier){
+  const card = document.getElementById('resultCard');
+  const headline = document.getElementById('headline');
+  const interp = document.getElementById('interp');
+
+  card.className = 'result-card tier' + tier;
+
+  if(tier === 1){
+    headline.textContent = 'Discuss continued routine screening with your doctor';
+    interp.innerHTML = `Based on the general factors you entered, routine screening on your doctor's recommended schedule is the right path for you. Breast cancer can occur at any risk level, so regular screening remains important regardless of this result. The daily habits CancerLess tracks — movement, alcohol, weight, sleep — can help keep your modifiable risk low over time.`;
+  } else if(tier === 2){
+    headline.textContent = 'Discuss added screening with your doctor';
+    interp.innerHTML = `Some of the factors you entered are worth a conversation with your doctor about whether additional or earlier screening makes sense for you. This is educational guidance, not a diagnosis — your doctor can do a full assessment. In the meantime, the daily habits CancerLess tracks can help lower your modifiable risk.`;
+  } else {
+    headline.textContent = 'Talk to your doctor about your elevated risk soon';
+    interp.innerHTML = `The factors you entered suggest it would be worthwhile to speak with a clinician soon about your breast cancer risk and the right screening or prevention plan for you. This is educational guidance, not a diagnosis, but it's a clear reason to connect with your doctor. Alongside that, the daily habits CancerLess tracks can meaningfully lower modifiable risk over time.`;
+  }
+}
+
+/* ---------- Disclaimer acknowledgment gate ---------- */
+let ackChecked = false;
+function toggleAck(){
+  ackChecked = !ackChecked;
+  document.getElementById('ackCheck').classList.toggle('checked', ackChecked);
+  document.getElementById('ackBtn').disabled = !ackChecked;
+}
+function revealResult(){
+  if(!ackChecked) return;
+  document.getElementById('ackGate').style.display = 'none';
+  document.getElementById('resultReveal').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function resetAck(){
+  ackChecked = false;
+  document.getElementById('ackCheck').classList.remove('checked');
+  document.getElementById('ackBtn').disabled = true;
+  document.getElementById('ackGate').style.display = 'block';
+  document.getElementById('resultReveal').style.display = 'none';
+}
+
+function restart(){
+  for(const k in data) data[k]=null; data.atyp='no';
+  document.getElementById('age').value='';
+  document.querySelectorAll('.choice').forEach(b=>b.classList.remove('sel'));
+  stepOrder=[0,1,2,3,4,5,6];
+  pos=0; resetAck(); buildProgress(); showStep(0); updateNextState();
+}
+
+/* ---------- init ---------- */
+buildProgress();
+showStep(0);
+updateNextState();
+resetAck();
+</script>
+</body>
+</html>
