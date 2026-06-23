@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CancerLess — General Risk Assessment</title>
+<style>
+  :root{
+    --bg:#ffffff; --ink:#1a2238; --muted:#5d6b85; --line:#e3e8f0;
+    --brand:#2bb3b3; --brand-deep:#1d8f8f; --brand-soft:#eafafa;
+    --warn-bg:#fff6ed; --warn-line:#f3d3a8; --warn-ink:#8a5a18;
+    --radius:16px; --shadow:0 6px 24px rgba(29,143,143,.10); font-size:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:520px;margin:0 auto;padding:20px 18px 40px}
+  .hero{text-align:center;padding:22px 16px 18px;background:linear-gradient(160deg,#eafafa 0%,#f3fbff 100%);border-radius:var(--radius);border:1px solid var(--line);margin-bottom:18px;}
+  .ribbon{width:38px;height:38px;margin:0 auto 8px;display:block}
+  .hero h1{font-size:1.35rem;line-height:1.25;margin:0 0 4px;font-weight:700;letter-spacing:-.01em}
+  .hero p{margin:0;color:var(--muted);font-size:.9rem}
+  .progress{display:flex;gap:6px;margin:18px 0 22px}
+  .progress span{flex:1;height:5px;border-radius:99px;background:var(--line);transition:background .3s}
+  .progress span.on{background:var(--brand)}
+  .step{display:none;animation:fade .35s ease}
+  .step.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .qnum{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-deep);font-weight:700;margin-bottom:6px}
+  .q{font-size:1.18rem;font-weight:650;margin:0 0 4px;letter-spacing:-.01em}
+  .hint{font-size:.85rem;color:var(--muted);margin:0 0 18px}
+  .choices{display:grid;gap:10px}
+  .choices.cols2{grid-template-columns:1fr 1fr}
+  .choice{border:1.5px solid var(--line);border-radius:12px;padding:14px;font-size:.95rem;background:#fff;cursor:pointer;text-align:left;transition:.15s;font-weight:500;color:var(--ink);}
+  .choice:hover{border-color:var(--brand)}
+  .choice.sel{border-color:var(--brand);background:var(--brand-soft);font-weight:650}
+  .nav{display:flex;gap:10px;margin-top:24px}
+  button.btn{flex:1;padding:15px;border-radius:99px;font-size:1rem;font-weight:650;border:none;cursor:pointer;transition:.15s}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.primary:active{background:var(--brand-deep)}
+  .btn.primary:disabled{background:#bfe3e3;cursor:not-allowed}
+  .btn.ghost{flex:0 0 auto;padding:15px 22px;background:#fff;border:1.5px solid var(--line);color:var(--muted)}
+  .result-card{text-align:center;padding:30px 22px;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:16px;transition:background .3s,border-color .3s;}
+  .result-card.tier1{background:#f2fbfb;border-color:#cdeeee}
+  .result-card.tier2{background:#e2f6f6;border-color:#a5e0e0}
+  .result-card.tier3{background:#cdeeee;border-color:#6fcccc;box-shadow:0 6px 22px rgba(29,143,143,.18)}
+  .result-icon{width:46px;height:46px;margin:0 auto 14px;display:block}
+  .result-card.tier1 .result-icon path{stroke:#5bbcbc}
+  .result-card.tier2 .result-icon path{stroke:#2bb3b3}
+  .result-card.tier3 .result-icon path{stroke:#1d8f8f}
+  .result-headline{font-size:1.22rem;font-weight:700;line-height:1.35;letter-spacing:-.01em;color:var(--brand-deep);margin:0 0 4px}
+  .result-card.tier3 .result-headline{color:#176f6f}
+  .interp{font-size:.95rem;color:var(--ink);text-align:left;margin:18px 2px 0;line-height:1.6}
+  .factors{margin:18px 2px 0;text-align:left}
+  .factors h4{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--brand-deep);margin:0 0 10px}
+  .factor-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:.92rem}
+  .factor-row:first-of-type{border-top:none}
+  .factor-dot{flex:0 0 auto;width:10px;height:10px;border-radius:50%}
+  .factor-dot.good{background:#5bbcbc}
+  .factor-dot.work{background:#1d8f8f}
+  .factor-text{flex:1}
+  .factor-tag{font-size:.78rem;font-weight:650;color:var(--muted)}
+  .ack-gate{border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;background:#fafdfd;margin-bottom:8px}
+  .ack-gate h3{font-size:1.05rem;margin:0 0 12px;font-weight:700}
+  .ack-body{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:18px}
+  .ack-body b{color:var(--ink)}
+  .ack-check{display:flex;align-items:flex-start;gap:11px;cursor:pointer;padding:14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;margin-bottom:16px;transition:.15s}
+  .ack-check.checked{border-color:var(--brand);background:var(--brand-soft)}
+  .ack-box{flex:0 0 auto;width:22px;height:22px;border:2px solid var(--muted);border-radius:6px;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.15s}
+  .ack-check.checked .ack-box{background:var(--brand);border-color:var(--brand)}
+  .ack-box svg{width:13px;height:13px;opacity:0;transition:.15s}
+  .ack-check.checked .ack-box svg{opacity:1}
+  .ack-label{font-size:.9rem;font-weight:600;line-height:1.45;color:var(--ink)}
+  .disclaimer{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn-ink);border-radius:12px;padding:13px 14px;font-size:.8rem;line-height:1.5;margin-top:18px}
+  .disclaimer b{color:var(--warn-ink)}
+  .footnote{font-size:.74rem;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
+  .restart{display:block;margin:18px auto 0;background:none;border:none;color:var(--brand-deep);font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="ribbon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 21c-2.5-3-5-5.5-5-9.2A3.8 3.8 0 0 1 12 8.2a3.8 3.8 0 0 1 5 3.6c0 3.7-2.5 6.2-5 9.2Z" stroke="#7fb8e6" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M9.5 11.5 14 4M14.5 11.5 10 4" stroke="#7fb8e6" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <h1>General Risk Assessment</h1>
+    <p>Your lifestyle baseline across cancer risk</p>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <!-- Q1 Smoking -->
+  <div class="step active" data-step="0">
+    <div class="qnum">Question 1 — Tobacco</div>
+    <p class="q">Do you use tobacco or smoke?</p>
+    <p class="hint">Tobacco is the single largest preventable cause of cancer.</p>
+    <div class="choices" id="smoke-choices">
+      <button class="choice" data-val="never">Never used</button>
+      <button class="choice" data-val="former">Former — I've quit</button>
+      <button class="choice" data-val="current">Currently use / smoke</button>
+    </div>
+  </div>
+
+  <!-- Q2 Alcohol -->
+  <div class="step" data-step="1">
+    <div class="qnum">Question 2 — Alcohol</div>
+    <p class="q">How often do you drink alcohol?</p>
+    <p class="hint">Guidelines suggest no more than 1 drink/day for women, 2 for men — and less is better for cancer risk.</p>
+    <div class="choices" id="alcohol-choices">
+      <button class="choice" data-val="none">I don't drink</button>
+      <button class="choice" data-val="moderate">Within recommended limits</button>
+      <button class="choice" data-val="heavy">More than recommended limits</button>
+    </div>
+  </div>
+
+  <!-- Q3 Weight -->
+  <div class="step" data-step="2">
+    <div class="qnum">Question 3 — Body Weight</div>
+    <p class="q">How would you describe your weight?</p>
+    <p class="hint">Excess body weight is the second-largest modifiable cancer risk factor, after tobacco.</p>
+    <div class="choices" id="weight-choices">
+      <button class="choice" data-val="healthy">In a healthy range for me</button>
+      <button class="choice" data-val="over">Somewhat above a healthy range</button>
+      <button class="choice" data-val="obese">Well above a healthy range</button>
+      <button class="choice" data-val="unknown">Not sure</button>
+    </div>
+  </div>
+
+  <!-- Q4 Physical activity -->
+  <div class="step" data-step="3">
+    <div class="qnum">Question 4 — Physical Activity</div>
+    <p class="q">How active are you in a typical week?</p>
+    <p class="hint">Guidelines suggest 150+ minutes of moderate activity per week.</p>
+    <div class="choices" id="activity-choices">
+      <button class="choice" data-val="active">Active most days (150+ min/week)</button>
+      <button class="choice" data-val="some">Somewhat active (some each week)</button>
+      <button class="choice" data-val="low">Rarely active / mostly sitting</button>
+    </div>
+  </div>
+
+  <!-- Q5 Diet -->
+  <div class="step" data-step="4">
+    <div class="qnum">Question 5 — Diet</div>
+    <p class="q">How would you describe your everyday diet?</p>
+    <p class="hint">Diets rich in vegetables, fruits, and whole grains — and low in processed/red meat — support lower risk.</p>
+    <div class="choices" id="diet-choices">
+      <button class="choice" data-val="good">Mostly whole foods, fruits & veggies</button>
+      <button class="choice" data-val="mixed">A mix of healthy and processed foods</button>
+      <button class="choice" data-val="poor">Mostly processed / fast food, low produce</button>
+    </div>
+  </div>
+
+  <!-- Q6 Sun protection -->
+  <div class="step" data-step="5">
+    <div class="qnum">Question 6 — Sun Protection</div>
+    <p class="q">Do you protect your skin from the sun?</p>
+    <p class="hint">Sun and UV exposure is the main preventable cause of skin cancer.</p>
+    <div class="choices" id="sun-choices">
+      <button class="choice" data-val="good">Usually — sunscreen / shade / cover up</button>
+      <button class="choice" data-val="some">Sometimes</button>
+      <button class="choice" data-val="poor">Rarely / I've had significant sun or tanning exposure</button>
+    </div>
+  </div>
+
+  <!-- Q7 Family history -->
+  <div class="step" data-step="6">
+    <div class="qnum">Question 7 — Family History</div>
+    <p class="q">Do you have a family history of cancer?</p>
+    <p class="hint">A close relative (parent, sibling, child) with cancer can raise your risk. This is not modifiable, but it's useful for your doctor.</p>
+    <div class="choices cols2" id="family-choices">
+      <button class="choice" data-val="0">No</button>
+      <button class="choice" data-val="1">One relative</button>
+      <button class="choice" data-val="2">Two or more</button>
+      <button class="choice" data-val="unknown">Not sure</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" data-step="7">
+    <div class="ack-gate" id="ackGate">
+      <h3>Before you see your guidance</h3>
+      <div class="ack-body">
+        This tool provides <b>general educational information only</b>. It is <b>not a medical diagnosis</b>, not a substitute for professional medical advice, and cannot tell you whether you do or do not have cancer. It does not replace screening or an evaluation by your doctor. It looks only at general lifestyle factors.
+      </div>
+      <div class="ack-check" id="ackCheck" onclick="toggleAck()">
+        <div class="ack-box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="ack-label">I understand this is educational information only, not medical advice, and that I should continue regular screening and talk with my doctor about my health.</div>
+      </div>
+      <button class="btn primary" id="ackBtn" onclick="revealResult()" disabled style="width:100%">Show my guidance</button>
+    </div>
+
+    <div id="resultReveal" style="display:none">
+      <div class="result-card" id="resultCard">
+        <svg class="result-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 21c-2.5-3-5-5.5-5-9.2A3.8 3.8 0 0 1 12 8.2a3.8 3.8 0 0 1 5 3.6c0 3.7-2.5 6.2-5 9.2Z" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M9.5 11.5 14 4M14.5 11.5 10 4" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <div class="result-headline" id="headline">—</div>
+        <div class="interp" id="interp"></div>
+
+        <div class="factors" id="factors">
+          <h4>Your modifiable factors</h4>
+          <div id="factorList"></div>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <b>About this guidance.</b> CancerLess looks at the major modifiable lifestyle factors identified by the American Cancer Society — tobacco, alcohol, body weight, physical activity, diet, and sun protection — which together account for a large share of preventable cancers. This is educational guidance to support healthy change, <b>not a diagnosis</b> or a personal risk score. It does not replace screening or medical care. Talk with your doctor about screening and any concerns.
+      </div>
+
+      <button class="restart" onclick="restart()">Start over</button>
+    </div>
+  </div>
+
+  <div class="nav" id="nav">
+    <button class="btn ghost" id="backBtn" onclick="back()" style="display:none">Back</button>
+    <button class="btn primary" id="nextBtn" onclick="next()">Continue</button>
+  </div>
+
+  <div class="footnote">CancerLess by Cancer Treatment Specialist, PC · For educational use only.<br>Not a substitute for professional medical advice.</div>
+</div>
+
+<script>
+const data={smoke:null,alcohol:null,weight:null,activity:null,diet:null,sun:null,family:null};
+let stepOrder=[0,1,2,3,4,5,6];
+let pos=0;
+const RESULT_STEP=7;
+
+function buildProgress(){const p=document.getElementById('progress');p.innerHTML='';stepOrder.forEach(()=>p.appendChild(document.createElement('span')));}
+function paintProgress(){document.querySelectorAll('#progress span').forEach((d,i)=>d.classList.toggle('on',i<=pos));}
+function showStep(s){document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));document.querySelector(`.step[data-step="${s}"]`).classList.add('active');document.getElementById('backBtn').style.display=pos>0?'block':'none';const isR=s===RESULT_STEP;document.getElementById('nav').style.display=isR?'none':'flex';if(!isR)document.getElementById('nextBtn').textContent=(pos===stepOrder.length-1)?'See my guidance':'Continue';paintProgress();window.scrollTo({top:0,behavior:'smooth'});}
+function currentStepId(){return stepOrder[pos];}
+function validateCurrent(){const id=currentStepId();const map={0:'smoke',1:'alcohol',2:'weight',3:'activity',4:'diet',5:'sun',6:'family'};if(data[map[id]]===null)return false;return true;}
+function next(){if(!validateCurrent())return;if(pos<stepOrder.length-1){pos++;showStep(currentStepId());}else{resetAck();compute();pos=stepOrder.length-1;showStep(RESULT_STEP);}updateNextState();}
+function back(){if(pos>0){pos--;showStep(currentStepId());updateNextState();}}
+function updateNextState(){const id=currentStepId();const btn=document.getElementById('nextBtn');const map={0:'smoke',1:'alcohol',2:'weight',3:'activity',4:'diet',5:'sun',6:'family'};btn.disabled=(data[map[id]]===null);}
+function wireChoices(cid,key){const c=document.getElementById(cid);c.querySelectorAll('.choice').forEach(b=>{b.addEventListener('click',()=>{c.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');data[key]=b.dataset.val;updateNextState();});});}
+wireChoices('smoke-choices','smoke');wireChoices('alcohol-choices','alcohol');wireChoices('weight-choices','weight');wireChoices('activity-choices','activity');wireChoices('diet-choices','diet');wireChoices('sun-choices','sun');wireChoices('family-choices','family');
+
+/* ===== Engine — three-tier ACTION band, no number shown =====
+   Counts modifiable factors that are "working well" vs "room to improve",
+   based on ACS major modifiable cancer risk factors. Tier reflects how much
+   opportunity there is to lower modifiable risk, always framed as action. */
+function compute(){
+  // each factor -> 'good' (working well) or 'work' (room to improve)
+  const f = [];
+  f.push({label:'Tobacco', state:(data.smoke==='never'?'good':(data.smoke==='former'?'good':'work')),
+          note:(data.smoke==='current'?'Quitting is the single most powerful step':(data.smoke==='former'?'Staying smoke-free protects you':'Smoke-free — keep it up'))});
+  f.push({label:'Alcohol', state:(data.alcohol==='heavy'?'work':'good'),
+          note:(data.alcohol==='heavy'?'Cutting back lowers risk':'Within helpful limits')});
+  f.push({label:'Body weight', state:(data.weight==='healthy'?'good':(data.weight==='unknown'?'good':'work')),
+          note:(data.weight==='over'||data.weight==='obese'?'A healthy weight lowers risk for many cancers':'Healthy range supports lower risk')});
+  f.push({label:'Physical activity', state:(data.activity==='active'?'good':(data.activity==='some'?'good':'work')),
+          note:(data.activity==='low'?'More movement lowers risk':'Staying active helps')});
+  f.push({label:'Diet', state:(data.diet==='good'?'good':(data.diet==='mixed'?'good':'work')),
+          note:(data.diet==='poor'?'More fruits, veggies & whole grains help':'A balanced diet supports lower risk')});
+  f.push({label:'Sun protection', state:(data.sun==='good'?'good':(data.sun==='some'?'good':'work')),
+          note:(data.sun==='poor'?'Sun protection lowers skin cancer risk':'Protecting your skin helps')});
+
+  const workCount = f.filter(x=>x.state==='work').length;
+  const fam = data.family==='unknown'?0:parseInt(data.family,10);
+  const currentSmoker = (data.smoke==='current');
+
+  // Tier logic — always action-framed, never reassuring/alarming
+  let tier;
+  if(currentSmoker || workCount>=3 || fam>=2){ tier=3; }
+  else if(workCount>=1 || fam>=1){ tier=2; }
+  else { tier=1; }
+
+  render(tier, f, fam);
+}
+
+function render(tier, factors, fam){
+  const card=document.getElementById('resultCard');
+  const headline=document.getElementById('headline');
+  const interp=document.getElementById('interp');
+  card.className='result-card tier'+tier;
+
+  if(tier===1){
+    headline.textContent='Discuss continued routine screening with your doctor';
+    interp.innerHTML=`Your lifestyle factors are largely working in your favor — that's worth celebrating. Risk is never zero, so keep up regular screening on your doctor's schedule. CancerLess can help you hold these healthy habits steady over time.`;
+  } else if(tier===2){
+    headline.textContent='A few habits offer a real chance to lower your risk';
+    interp.innerHTML=`You're doing well in several areas, and a few changes below could lower your modifiable cancer risk further. None of this is a diagnosis — it's an opportunity. CancerLess is built to help you track and improve these habits over time, and keep up regular screening with your doctor.`;
+  } else {
+    headline.textContent='Several habits offer a strong chance to lower your risk';
+    interp.innerHTML=`The good news in cancer prevention: many of the biggest risk factors are things you can change. The areas below are where you have the most opportunity. ${fam>=2?'Given your family history, this is also a good reason to talk with your doctor about screening. ':''}CancerLess is built to help you make and track these changes over time — and please keep up regular screening with your doctor.`;
+  }
+
+  // factor breakdown
+  const list=document.getElementById('factorList');
+  list.innerHTML='';
+  factors.forEach(x=>{
+    const row=document.createElement('div');
+    row.className='factor-row';
+    row.innerHTML=`<span class="factor-dot ${x.state}"></span>
+      <span class="factor-text">${x.label}</span>
+      <span class="factor-tag">${x.state==='good'?'Working well':'Room to improve'}</span>`;
+    list.appendChild(row);
+  });
+}
+
+let ackChecked=false;
+function toggleAck(){ackChecked=!ackChecked;document.getElementById('ackCheck').classList.toggle('checked',ackChecked);document.getElementById('ackBtn').disabled=!ackChecked;}
+function revealResult(){if(!ackChecked)return;document.getElementById('ackGate').style.display='none';document.getElementById('resultReveal').style.display='block';window.scrollTo({top:0,behavior:'smooth'});}
+function resetAck(){ackChecked=false;document.getElementById('ackCheck').classList.remove('checked');document.getElementById('ackBtn').disabled=true;document.getElementById('ackGate').style.display='block';document.getElementById('resultReveal').style.display='none';}
+
+function restart(){for(const k in data)data[k]=null;document.querySelectorAll('.choice').forEach(b=>b.classList.remove('sel'));stepOrder=[0,1,2,3,4,5,6];pos=0;resetAck();buildProgress();showStep(0);updateNextState();}
+
+buildProgress();showStep(0);updateNextState();resetAck();
+</script>
+</body>
+</html>
