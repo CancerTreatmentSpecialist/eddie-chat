@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Eddie Clinical Trials Pro</title>
+
+<style>
+
+:root{
+    --primary:#68B5FF;
+    --primary-dark:#4A97FF;
+    --accent:#EAF5FF;
+    --white:#ffffff;
+    --text:#16324F;
+    --muted:#64748B;
+    --border:#D9EAFB;
+    --shadow:0 12px 40px rgba(77,144,254,.12);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    background:#F8FBFF;
+    color:var(--text);
+    height:100vh;
+}
+
+.container{
+    display:grid;
+    grid-template-columns:420px 1fr;
+    height:100vh;
+}
+
+/* LEFT PANEL */
+
+.sidebar{
+    background:white;
+    border-right:1px solid var(--border);
+    padding:32px;
+    overflow:auto;
+}
+
+.logo{
+    margin-bottom:30px;
+}
+
+.logo h1{
+    font-size:2rem;
+    font-weight:700;
+}
+
+.logo span{
+    color:var(--primary-dark);
+}
+
+.logo p{
+    margin-top:8px;
+    color:var(--muted);
+}
+
+.hero-card{
+    background:linear-gradient(
+    135deg,
+    #68B5FF,
+    #94CCFF
+    );
+    color:white;
+    border-radius:20px;
+    padding:24px;
+    margin-bottom:24px;
+    box-shadow:var(--shadow);
+}
+
+.hero-card h2{
+    margin-bottom:12px;
+}
+
+.hero-card p{
+    line-height:1.5;
+}
+
+.section-title{
+    font-size:.9rem;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-weight:700;
+    color:#6B7280;
+    margin-bottom:12px;
+}
+
+.action-grid{
+    display:grid;
+    gap:12px;
+    margin-bottom:30px;
+}
+
+.action{
+    padding:16px;
+    border-radius:14px;
+    background:white;
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
+}
+
+.action strong{
+    display:block;
+    margin-bottom:4px;
+}
+
+.action p{
+    color:var(--muted);
+    font-size:.9rem;
+}
+
+.study-card{
+    background:#F9FCFF;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:18px;
+}
+
+.study-card h3{
+    margin-bottom:10px;
+}
+
+.study-card ul{
+    padding-left:20px;
+}
+
+.study-card li{
+    margin-bottom:6px;
+}
+
+.metric-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.metric{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+}
+
+.metric h3{
+    color:var(--primary-dark);
+}
+
+.metric p{
+    font-size:.85rem;
+    color:var(--muted);
+}
+
+/* RIGHT SIDE */
+
+.main{
+    display:flex;
+    flex-direction:column;
+}
+
+.topbar{
+    height:88px;
+    background:white;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 30px;
+}
+
+.topbar h2{
+    font-weight:700;
+}
+
+.badge{
+    background:#E3F2FF;
+    color:#2673D8;
+    padding:8px 14px;
+    border-radius:50px;
+    font-size:.85rem;
+    font-weight:600;
+}
+
+.chat-container{
+    flex:1;
+    padding:24px;
+}
+
+.chat-window{
+
+    height:100%;
+    background:white;
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+@media(max-width:1024px){
+
+.container{
+    grid-template-columns:1fr;
+}
+
+.sidebar{
+    display:none;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+
+<div class="logo">
+
+<h1>Eddie Clinical Trials <span>Pro</span></h1>
+
+<p>
+AI-powered trial eligibility screening
+for investigators, coordinators and sponsors.
+</p>
+
+</div>
+
+<div class="hero-card">
+
+<h2>Accelerate Screening</h2>
+
+<p>
+Identify potential eligibility criteria,
+review protocol requirements and streamline
+research workflows in seconds.
+</p>
+
+</div>
+
+<div class="section-title">
+Quick Actions
+</div>
+
+<div class="action-grid">
+
+<div class="action">
+<strong>🧬 Screen a Patient</strong>
+<p>Evaluate trial inclusion and exclusion criteria.</p>
+</div>
+
+<div class="action">
+<strong>📋 Eligibility Review</strong>
+<p>Assess protocol feasibility and fit.</p>
+</div>
+
+<div class="action">
+<strong>🔍 Search Trial Criteria</strong>
+<p>Review study-specific requirements.</p>
+</div>
+
+<div class="action">
+<strong>🏥 Multi-Trial Comparison</strong>
+<p>Compare eligibility across multiple studies.</p>
+</div>
+
+</div>
+
+<div class="study-card">
+
+<h3>Active Programs</h3>
+
+<ul>
+<li>TEMPUS GEMINI</li>
+<li>AIRES</li>
+<li>PHOENIX</li>
+<li>Sponsor Managed Studies</li>
+</ul>
+
+</div>
+
+<div class="study-card">
+
+<h3>Example Cases</h3>
+
+<ul>
+<li>Stage III NSCLC</li>
+<li>Metastatic TNBC</li>
+<li>mCRPC</li>
+<li>MSI-H Colorectal Cancer</li>
+</ul>
+
+</div>
+
+<div class="metric-grid">
+
+<div class="metric">
+<h3>24/7</h3>
+<p>Screening Access</p>
+</div>
+
+<div class="metric">
+<h3>AI</h3>
+<p>Eligibility Support</p>
+</div>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="topbar">
+
+<div>
+<h2>Eddie Clinical Trials Pro</h2>
+</div>
+
+<div class="badge">
+Research Workspace
+</div>
+
+</div>
+
+<div class="chat-container">
+
+<div class="chat-window">
+
+/environments/Default-55392b7f-41f9-468a-8aae-c256bc68afe5/bots/auto_agent_ZQATx/webchat?__version__=2">
+</iframe>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>
