@@ -25,7 +25,7 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Segoe UI, sans-serif;
+    font-family:Segoe UI, Arial, sans-serif;
 }
 
 body{
@@ -36,26 +36,27 @@ body{
 
 .container{
     display:grid;
-    grid-template-columns:420px 1fr;
+    grid-template-columns:380px 1fr;
     height:100vh;
 }
 
-/* LEFT PANEL */
+/* SIDEBAR */
 
 .sidebar{
     background:white;
     border-right:1px solid var(--border);
     padding:32px;
-    overflow:auto;
+    overflow-y:auto;
 }
 
 .logo{
-    margin-bottom:30px;
+    margin-bottom:25px;
 }
 
 .logo h1{
     font-size:2rem;
     font-weight:700;
+    line-height:1.1;
 }
 
 .logo span{
@@ -63,8 +64,9 @@ body{
 }
 
 .logo p{
-    margin-top:8px;
+    margin-top:10px;
     color:var(--muted);
+    line-height:1.5;
 }
 
 .hero-card{
@@ -82,43 +84,11 @@ body{
 
 .hero-card h2{
     margin-bottom:12px;
+    font-size:1.75rem;
 }
 
 .hero-card p{
-    line-height:1.5;
-}
-
-.section-title{
-    font-size:.9rem;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    font-weight:700;
-    color:#6B7280;
-    margin-bottom:12px;
-}
-
-.action-grid{
-    display:grid;
-    gap:12px;
-    margin-bottom:30px;
-}
-
-.action{
-    padding:16px;
-    border-radius:14px;
-    background:white;
-    border:1px solid var(--border);
-    box-shadow:var(--shadow);
-}
-
-.action strong{
-    display:block;
-    margin-bottom:4px;
-}
-
-.action p{
-    color:var(--muted);
-    font-size:.9rem;
+    line-height:1.6;
 }
 
 .study-card{
@@ -130,7 +100,8 @@ body{
 }
 
 .study-card h3{
-    margin-bottom:10px;
+    margin-bottom:12px;
+    font-size:1.1rem;
 }
 
 .study-card ul{
@@ -138,33 +109,10 @@ body{
 }
 
 .study-card li{
-    margin-bottom:6px;
+    margin-bottom:8px;
 }
 
-.metric-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-}
-
-.metric{
-    background:white;
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:18px;
-    text-align:center;
-}
-
-.metric h3{
-    color:var(--primary-dark);
-}
-
-.metric p{
-    font-size:.85rem;
-    color:var(--muted);
-}
-
-/* RIGHT SIDE */
+/* MAIN */
 
 .main{
     display:flex;
@@ -181,16 +129,21 @@ body{
     padding:0 30px;
 }
 
-.topbar h2{
-    font-weight:700;
+.title-area h2{
+    font-size:2rem;
+}
+
+.title-area p{
+    color:var(--muted);
+    margin-top:4px;
 }
 
 .badge{
     background:#E3F2FF;
     color:#2673D8;
-    padding:8px 14px;
-    border-radius:50px;
-    font-size:.85rem;
+    padding:10px 16px;
+    border-radius:999px;
+    font-size:.9rem;
     font-weight:600;
 }
 
@@ -200,13 +153,11 @@ body{
 }
 
 .chat-window{
-
     height:100%;
     background:white;
     border-radius:24px;
     overflow:hidden;
     box-shadow:var(--shadow);
-
 }
 
 iframe{
@@ -215,7 +166,7 @@ iframe{
     border:none;
 }
 
-@media(max-width:1024px){
+@media (max-width:1024px){
 
 .container{
     grid-template-columns:1fr;
@@ -235,94 +186,116 @@ iframe{
 
 <div class="container">
 
-<div class="sidebar">
+    <!-- LEFT SIDEBAR -->
 
-<div class="logo">
+    <div class="sidebar">
 
-<h1>Eddie Clinical Trials <span>Pro</span></h1>
+        <div class="logo">
 
-<p>
-AI-powered trial eligibility screening
-for investigators, coordinators and sponsors.
-</p>
+            <h1>
+                Eddie Clinical Trials
+                <span>Pro</span>
+            </h1>
 
-</div>
+            <p>
+                AI-powered trial eligibility screening for
+                investigators, coordinators, sponsors,
+                and academic research programs.
+            </p>
 
-<div class="hero-card">
+        </div>
 
-<h2>AI-Powered Trial Eligibility Screening</h2>
+        <div class="hero-card">
 
-<p>
-Identify potential eligibility criteria,
-review protocol requirements and streamline
-research workflows in seconds.
-</p>
+            <h2>
+                AI-Powered Trial Eligibility Screening
+            </h2>
 
-</div>
+            <p>
+                Identify potential eligibility criteria,
+                review protocol requirements,
+                evaluate biomarkers,
+                and streamline research workflows.
+            </p>
 
+        </div>
 
-</div>
+        <div class="study-card">
 
-<div class="study-card">
+            <h3>Active Programs</h3>
 
-<h3>Active Programs</h3>
+            <ul>
+                <li>TEMPUS GEMINI</li>
+                <li>AIRES</li>
+                <li>PHOENIX</li>
+                <li>Sponsor Managed Studies</li>
+            </ul>
 
-<ul>
-<li>TEMPUS GEMINI</li>
-<li>AIRES</li>
-<li>PHOENIX</li>
-<li>Sponsor Managed Studies</li>
-</ul>
+        </div>
 
-</div>
+        <div class="study-card">
 
+            <h3>Supported Workflows</h3>
 
+            <ul>
+                <li>Eligibility Screening</li>
+                <li>Protocol Review</li>
+                <li>Study Comparison</li>
+                <li>Biomarker Assessment</li>
+                <li>Research Team Support</li>
+            </ul>
 
+        </div>
 
-<div class="metric-grid">
+        <div class="study-card">
 
-<div class="metric">
-<h3>24/7</h3>
-<p>Screening Access</p>
-</div>
+            <h3>Eddie Platform Suite</h3>
 
-<div class="metric">
-<h3>AI</h3>
-<p>Eligibility Support</p>
-</div>
+            <ul>
+                <li>Cancerless</li>
+                <li>Ask Eddie</li>
+                <li>Eddie Clinical Trials Navigator</li>
+                <li>Eddie Clinical Trials Pro</li>
+            </ul>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
-<div class="main">
+    <!-- MAIN CONTENT -->
 
-<div class="topbar">
+    <div class="main">
 
-<div>
-<h2>Eddie Clinical Trials Pro</h2>
-</div>
+        <div class="topbar">
 
-<div class="badge">
-Institutional Edition
-</div>
+            <div class="title-area">
 
-</div>
+                <h2>Eddie Clinical Trials Pro</h2>
 
-<div class="chat-container">
+                <p>
+                    AI-Powered Eligibility Screening
+                </p>
 
-<div class="chat-window">
-<iframe
-src="https://copilotstudio.microsoft.com/environments/Default-55392b7f-41f9-468a-8aae-c256bc68afe5/bots/auto_agent_ZQATx/webchat?__version__=2"
-frameborder="0"
-style="width:100%;height:100%;">
-</iframe>
+            </div>
 
-</div>
+            <div class="badge">
+                Research Edition
+            </div>
 
-</div>
+        </div>
 
-</div>
+        <div class="chat-container">
+
+            <div class="chat-window">
+
+                copilotstudio.microsoft.com/environments/Default-55392b7f-41f9-468a-8aae-c256bc68afe5/bots/auto_agent_ZQATx/webchat?__version__=2">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
