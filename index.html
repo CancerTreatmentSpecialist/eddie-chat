@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Eddie Clinical Trials Pro</title>
+
+<style>
+
+:root{
+    --primary:#68B5FF;
+    --primary-dark:#4A97FF;
+    --accent:#EAF5FF;
+    --white:#ffffff;
+    --text:#16324F;
+    --muted:#64748B;
+    --border:#D9EAFB;
+    --shadow:0 12px 40px rgba(77,144,254,.12);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, Arial, sans-serif;
+}
+
+body{
+    background:#F8FBFF;
+    color:var(--text);
+    height:100vh;
+}
+
+.container{
+    display:grid;
+    grid-template-columns:380px 1fr;
+    height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    background:white;
+    border-right:1px solid var(--border);
+    padding:32px;
+    overflow-y:auto;
+}
+
+.logo{
+    margin-bottom:25px;
+}
+
+.logo h1{
+    font-size:2rem;
+    font-weight:700;
+    line-height:1.1;
+}
+
+.logo span{
+    color:var(--primary-dark);
+}
+
+.logo p{
+    margin-top:10px;
+    color:var(--muted);
+    line-height:1.5;
+}
+
+.hero-card{
+    background:linear-gradient(
+    135deg,
+    #68B5FF,
+    #94CCFF
+    );
+    color:white;
+    border-radius:20px;
+    padding:24px;
+    margin-bottom:24px;
+    box-shadow:var(--shadow);
+}
+
+.hero-card h2{
+    margin-bottom:12px;
+    font-size:1.75rem;
+}
+
+.hero-card p{
+    line-height:1.6;
+}
+
+.study-card{
+    background:#F9FCFF;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:18px;
+}
+
+.study-card h3{
+    margin-bottom:12px;
+    font-size:1.1rem;
+}
+
+.study-card ul{
+    padding-left:20px;
+}
+
+.study-card li{
+    margin-bottom:8px;
+}
+
+/* MAIN */
+
+.main{
+    display:flex;
+    flex-direction:column;
+}
+
+.topbar{
+    height:88px;
+    background:white;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 30px;
+}
+
+.title-area h2{
+    font-size:2rem;
+}
+
+.title-area p{
+    color:var(--muted);
+    margin-top:4px;
+}
+
+.badge{
+    background:#E3F2FF;
+    color:#2673D8;
+    padding:10px 16px;
+    border-radius:999px;
+    font-size:.9rem;
+    font-weight:600;
+}
+
+.chat-container{
+    flex:1;
+    padding:24px;
+}
+
+.chat-window{
+    height:100%;
+    background:white;
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+@media (max-width:1024px){
+
+.container{
+    grid-template-columns:1fr;
+}
+
+.sidebar{
+    display:none;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- LEFT SIDEBAR -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+
+            <h1>
+                Eddie Clinical Trials
+                <span>Pro</span>
+            </h1>
+
+            <p>
+                AI-powered trial eligibility screening for
+                investigators, coordinators, sponsors,
+                and academic research programs.
+            </p>
+
+        </div>
+
+        <div class="hero-card">
+
+            <h2>
+                AI-Powered Trial Eligibility Screening
+            </h2>
+
+            <p>
+                Identify potential eligibility criteria,
+                review protocol requirements,
+                evaluate biomarkers,
+                and streamline research workflows.
+            </p>
+
+        </div>
+
+        <div class="study-card">
+
+            <h3>Active Programs</h3>
+
+            <ul>
+                <li>TEMPUS GEMINI</li>
+                <li>AIRES</li>
+                <li>PHOENIX</li>
+                <li>Sponsor Managed Studies</li>
+            </ul>
+
+        </div>
+
+        <div class="study-card">
+
+            <h3>Supported Workflows</h3>
+
+            <ul>
+                <li>Eligibility Screening</li>
+                <li>Protocol Review</li>
+                <li>Study Comparison</li>
+                <li>Biomarker Assessment</li>
+                <li>Research Team Support</li>
+            </ul>
+
+        </div>
+
+        <div class="study-card">
+
+            <h3>Eddie Platform Suite</h3>
+
+            <ul>
+                <li>Cancerless</li>
+                <li>Ask Eddie</li>
+                <li>Eddie Clinical Trials Navigator</li>
+                <li>Eddie Clinical Trials Pro</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+    <!-- MAIN CONTENT -->
+
+    <div class="main">
+
+        <div class="topbar">
+
+            <div class="title-area">
+
+                <h2>Eddie Clinical Trials Pro</h2>
+
+                <p>
+                    AI-Powered Eligibility Screening
+                </p>
+
+            </div>
+
+            <div class="badge">
+                Institutional Edition
+            </div>
+
+        </div>
+
+        <div class="chat-container">
+
+           <div class="chat-window">
+
+<iframe
+src="https://copilotstudio.microsoft.com/environments/Default-55392b7f-41f9-468a-8aae-c256bc68afe5/bots/auto_agent_ZQATx/webchat?__version__=2">
+</iframe>
+
+</div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
