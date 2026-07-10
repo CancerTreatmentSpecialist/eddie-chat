@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CancerLess Track & Trends</title>
+
+<style>
+
+:root{
+    --primary:#18c3c8;
+    --secondary:#0d4c97;
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#1f2937;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding-bottom:40px;
+}
+
+.hero{
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    color:white;
+    padding:32px 24px;
+    border-radius:0 0 30px 30px;
+}
+
+.hero h1{
+    font-size:32px;
+    margin-bottom:6px;
+}
+
+.hero p{
+    opacity:.92;
+    line-height:1.5;
+}
+
+.container{
+    padding:18px;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:0 4px 16px rgba(0,0,0,.06);
+}
+
+.score-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.score-number{
+    font-size:42px;
+    font-weight:700;
+    color:var(--secondary);
+}
+
+.score-label{
+    color:#6b7280;
+    font-size:14px;
+}
+
+.streak{
+    background:#fff3e6;
+    color:#d97706;
+    padding:10px 16px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+.section-title{
+    margin-bottom:16px;
+    font-weight:700;
+    font-size:20px;
+}
+
+.progress-row{
+    margin-bottom:18px;
+}
+
+.progress-header{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+}
+
+.progress-bar{
+    height:12px;
+    border-radius:20px;
+    background:#e5e7eb;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    border-radius:20px;
+}
+
+.chart{
+    width:100%;
+    height:220px;
+}
+
+.checkin{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid #f0f0f0;
+}
+
+.checkin:last-child{
+    border-bottom:none;
+}
+
+.summary{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.summary-card{
+    background:#eef7ff;
+    border-radius:14px;
+    padding:14px;
+    text-align:center;
+}
+
+.summary-card h3{
+    color:var(--secondary);
+    margin-bottom:4px;
+}
+
+.footer{
+    text-align:center;
+    color:#6b7280;
+    font-size:12px;
+    margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="hero">
+    <h1>Track & Trends</h1>
+    <p>
+        See how your daily habits are adding up over time.
+    </p>
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <div class="score-row">
+
+            <div>
+                <div class="score-label">
+                    Current Wellness Score
+                </div>
+
+                <div class="score-number">
+                    18/20
+                </div>
+            </div>
+
+            <div class="streak">
+                🔥 7 Day Streak
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="section-title">
+            Wellness Breakdown
+        </div>
+
+        <div class="progress-row">
+            <div class="progress-header">
+                <span>🏃 Activity</span>
+                <span>80%</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width:80%;background:#18c3c8;">
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-row">
+            <div class="progress-header">
+                <span>🥗 Nutrition</span>
+                <span>85%</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width:85%;background:#30d158;">
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-row">
+            <div class="progress-header">
+                <span>😴 Sleep</span>
+                <span>75%</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width:75%;background:#6366f1;">
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-row">
+            <div class="progress-header">
+                <span>🚭 Tobacco Free</span>
+                <span>100%</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width:100%;background:#f59e0b;">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="section-title">
+            30-Day Wellness Trend
+        </div>
+
+        <svg class="chart" viewBox="0 0 300 200">
+
+            <polyline
+                fill="none"
+                stroke="#18c3c8"
+                stroke-width="4"
+                points="
+                10,180
+                40,160
+                70,170
+                100,140
+                130,120
+                160,125
+                190,100
+                220,95
+                250,85
+                290,60
+                "/>
+
+            <line x1="0" y1="180" x2="300" y2="180"
+                stroke="#ccc"/>
+
+        </svg>
+
+    </div>
+
+    <div class="card">
+
+        <div class="section-title">
+            Recent Check-Ins
+        </div>
+
+        <div class="checkin">
+            <span>July 10</span>
+            <strong>18/20</strong>
+        </div>
+
+        <div class="checkin">
+            <span>July 9</span>
+            <strong>17/20</strong>
+        </div>
+
+        <div class="checkin">
+            <span>July 8</span>
+            <strong>16/20</strong>
+        </div>
+
+        <div class="checkin">
+            <span>July 7</span>
+            <strong>18/20</strong>
+        </div>
+
+        <div class="checkin">
+            <span>July 6</span>
+            <strong>15/20</strong>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="section-title">
+            Monthly Summary
+        </div>
+
+        <div class="summary">
+
+            <div class="summary-card">
+                <h3>25</h3>
+                <div>Tobacco-Free Days</div>
+            </div>
+
+            <div class="summary-card">
+                <h3>4.1</h3>
+                <div>Avg Activity</div>
+            </div>
+
+            <div class="summary-card">
+                <h3>3.9</h3>
+                <div>Avg Nutrition</div>
+            </div>
+
+            <div class="summary-card">
+                <h3>4.2</h3>
+                <div>Avg Sleep</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="section-title">
+            Prevention Insight
+        </div>
+
+        <p style="line-height:1.7;">
+            Your wellness score has improved over the past month.
+            Consistent physical activity and continued tobacco-free
+            living are contributing positively to your prevention goals.
+            Keep building healthy habits one day at a time.
+        </p>
+
+    </div>
+
+    <div class="footer">
+        CancerLess • Prevention Tracking & Wellness Trends
+    </div>
+
+</div>
+
+</body>
+</html>
