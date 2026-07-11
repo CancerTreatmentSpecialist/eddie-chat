@@ -183,162 +183,301 @@ textarea{
     display:none;
     margin:0 18px 18px;
     background:#ecfdf5;
-    font-weight:700;
-    color:#0057a8;
-}
-
-.section{
-    margin:20px;
-}
-
-.card{
-    background:white;
-    border-radius:20px;
-    padding:20px;
-    box-shadow:0 4px 16px rgba(0,0,0,.05);
-    margin-bottom:16px;
-}
-
-.card h3{
-    margin-bottom:8px;
-    font-size:18px;
-}
-
-.subtitle{
-    color:#6b7280;
-    font-size:14px;
-    margin-bottom:15px;
-}
-
-.slider{
-    width:100%;
-}
-
-.score-badge{
-    margin-top:12px;
-    background:#eaf5ff;
-    color:#0057a8;
-    padding:8px 12px;
-    border-radius:10px;
-    display:inline-block;
-    font-weight:600;
-}
-
-.labels{
-    margin-top:8px;
-    display:flex;
-    justify-content:space-between;
-    font-size:12px;
-    color:#6b7280;
-}
-
-.chips{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-}
-
-.chip{
-    border:2px solid #20c6c9;
-    padding:10px 16px;
-    border-radius:30px;
-    cursor:pointer;
-    transition:.2s;
-}
-
-.chip.selected{
-    background:#20c6c9;
-    color:white;
-}
-
-textarea{
-    width:100%;
-    min-height:100px;
-    border:1px solid #d1d5db;
-    border-radius:12px;
-    padding:12px;
-    resize:none;
-    font-family:inherit;
-    font-size:15px;
-}
-
-.save-btn{
-    margin:20px;
-    width:calc(100% - 40px);
-    border:none;
-    border-radius:16px;
-    padding:18px;
-    color:white;
-    font-size:18px;
-    font-weight:700;
-    background:linear-gradient(135deg,#20c6c9,#0057a8);
-    cursor:pointer;
-}
-
-.result{
-    display:none;
-    margin:20px;
-    padding:20px;
-    background:#ecfdf5;
     border:1px solid #86efac;
-    border-radius:16px;
+    border-radius:18px;
+    padding:20px;
     text-align:center;
-}
-
-.insight{
-    background:#eef7ff;
-    border-left:4px solid #0057a8;
-    padding:14px;
-    border-radius:10px;
-    margin-top:10px;
-    line-height:1.5;
 }
 
 .footer{
     text-align:center;
     color:#6b7280;
     font-size:12px;
-    margin-top:25px;
+    padding:20px;
 }
 
 .error-box{
     background:#dc2626;
     color:white;
-    padding:15px;
-    margin:15px;
-    border-radius:10px;
-    font-size:14px;
+    padding:10px;
+    margin:10px;
+    border-radius:8px;
 }
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
 <div class="hero">
     <h1>Daily Prevention Check-In</h1>
-    <p>Small healthy habits today can lead to a healthier tomorrow.</p>
+    <p>
+        Small healthy habits today can lead to a healthier tomorrow.
+    </p>
 </div>
 
 <div class="score-card">
+
     <div class="score-top">
+
         <div>
-            <div style="font-weight:600;">Today's Wellness Score</div>
-            <div class="score-number" id="wellnessScore">9</div>
+            <div class="score-label">
+                Today's Wellness Score
+            </div>
+
+            <div class="score-number" id="wellnessScore">
+                9
+            </div>
         </div>
 
         <div class="streak">
             🔥 Daily Habit
         </div>
+
     </div>
+
 </div>
 
 <div class="section">
 
-    <div class="card">
-        <h3>🏃 Physical Activity</h3>
-        <div class="subtitle">How active were you today?</div>
+<div class="card">
 
-        <input class="slider" id="exercise" type="range" min="1" max="5" value="3">
+<h3>🏃 Physical Activity</h3>
 
-        <div class="labels">
-            <span>None</span>
+<div class="subtitle">
+How active were you today?
+</div>
+
+<input class="slider" id="exercise" type="range" min="1" max="5" value="3">
+
+<div class="labels">
+<span>None</span>
+<span>Very Active</span>
+</div>
+
+<div class="score-badge" id="exerciseLabel">
+Score: 3
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>🥗 Nutrition</h3>
+
+<div class="subtitle">
+How healthy were your food choices today?
+</div>
+
+<input class="slider" id="nutrition" type="range" min="1" max="5" value="3">
+
+<div class="labels">
+<span>Poor</span>
+<span>Excellent</span>
+</div>
+
+<div class="score-badge" id="nutritionLabel">
+Score: 3
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>😴 Sleep</h3>
+
+<div class="subtitle">
+How well did you sleep?
+</div>
+
+<input class="slider" id="sleep" type="range" min="1" max="5" value="3">
+
+<div class="labels">
+<span>Poor</span>
+<span>Excellent</span>
+</div>
+
+<div class="score-badge" id="sleepLabel">
+Score: 3
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>🚭 Tobacco Status</h3>
+
+<div class="subtitle">
+Did you use tobacco today?
+</div>
+
+<div class="chips">
+<div class="chip selected" onclick="setTobacco(false,this)">No</div>
+<div class="chip" onclick="setTobacco(true,this)">Yes</div>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>🩺 Screening Status</h3>
+
+<div class="subtitle">
+What best describes your screening status?
+</div>
+
+<div class="chips screening-group">
+<div class="chip selected" onclick="setScreening('up_to_date',this)">Up To Date</div>
+<div class="chip" onclick="setScreening('due_soon',this)">Due Soon</div>
+<div class="chip" onclick="setScreening('overdue',this)">Overdue</div>
+<div class="chip" onclick="setScreening('not_sure',this)">Not Sure</div>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>💡 Healthy Goal For Tomorrow</h3>
+
+<div class="subtitle">
+Optional reflection
+</div>
+
+<textarea id="reflection"
+placeholder="Walk 30 minutes, eat more vegetables, schedule a screening appointment..."></textarea>
+
+</div>
+
+<div class="card">
+
+<h3>📘 Prevention Insight</h3>
+
+<div class="insight">
+Consistent physical activity, healthy nutrition, adequate sleep,
+and avoiding tobacco are important steps toward better long-term wellness.
+</div>
+
+</div>
+
+</div>
+
+<button class="save-btn" onclick="saveCheckin()">
+Save Today's Check-In
+</button>
+
+<div id="result" class="result"></div>
+
+<div class="footer">
+CancerLess • Prevention & Wellness Tracking
+</div>
+
+</div>
+
+<script>
+window.onerror=function(msg){
+console.log(msg);
+};
+
+let tobaccoUsed=false;
+let screeningStatus="up_to_date";
+
+function updateWellness(){
+
+const exercise=parseInt(document.getElementById('exercise').value||0);
+const nutrition=parseInt(document.getElementById('nutrition').value||0);
+const sleep=parseInt(document.getElementById('sleep').value||0);
+
+let score=exercise+nutrition+sleep;
+
+if(!tobaccoUsed){
+score+=3;
+}
+
+if(screeningStatus==="up_to_date"){
+score+=2;
+}
+
+document.getElementById('wellnessScore').textContent=score;
+}
+
+function bindSlider(id,labelId){
+
+const slider=document.getElementById(id);
+
+if(!slider) return;
+
+slider.addEventListener('input',function(){
+
+document.getElementById(labelId).textContent=
+"Score: "+slider.value;
+
+updateWellness();
+
+});
+}
+
+function setTobacco(value,element){
+
+tobaccoUsed=value;
+
+element.parentElement.querySelectorAll('.chip')
+.forEach(c=>c.classList.remove('selected'));
+
+element.classList.add('selected');
+
+updateWellness();
+}
+
+function setScreening(value,element){
+
+screeningStatus=value;
+
+document.querySelectorAll('.screening-group .chip')
+.forEach(c=>c.classList.remove('selected'));
+
+element.classList.add('selected');
+
+updateWellness();
+}
+
+function saveCheckin(){
+
+const score=document.getElementById('wellnessScore').textContent;
+
+try{
+
+localStorage.setItem(
+"cancerless_daily_checkin",
+JSON.stringify({
+date:new Date().toISOString(),
+score:score,
+reflection:document.getElementById('reflection').value
+})
+);
+
+}catch(e){}
+
+const result=document.getElementById('result');
+
+result.style.display='block';
+
+result.innerHTML=
+'<h3>✅ Check-In Saved</h3>'+
+'<p style="margin-top:10px;">Wellness Score: <strong>'+score+'</strong></p>'+
+'<p style="margin-top:10px;">Great job investing in your future health today.</p>';
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+
+bindSlider('exercise','exerciseLabel');
+bindSlider('nutrition','nutritionLabel');
+bindSlider('sleep','sleepLabel');
+
+updateWellness();
+
+});
+</script>
+
+</body>
+</html>
