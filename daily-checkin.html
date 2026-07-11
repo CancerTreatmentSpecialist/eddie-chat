@@ -89,10 +89,6 @@ body{
     margin-bottom:15px;
 }
 
-.slider-container{
-    margin-top:15px;
-}
-
 .slider{
     width:100%;
 }
@@ -183,6 +179,15 @@ textarea{
     font-size:12px;
     margin-top:25px;
 }
+
+.error-box{
+    background:#dc2626;
+    color:white;
+    padding:15px;
+    margin:15px;
+    border-radius:10px;
+    font-size:14px;
+}
 </style>
 </head>
 
@@ -190,13 +195,10 @@ textarea{
 
 <div class="hero">
     <h1>Daily Prevention Check-In</h1>
-    <p>
-        Small healthy habits today can lead to a healthier tomorrow.
-    </p>
+    <p>Small healthy habits today can lead to a healthier tomorrow.</p>
 </div>
 
 <div class="score-card">
-
     <div class="score-top">
         <div>
             <div style="font-weight:600;">Today's Wellness Score</div>
@@ -207,289 +209,15 @@ textarea{
             🔥 Daily Habit
         </div>
     </div>
-
 </div>
 
 <div class="section">
 
     <div class="card">
         <h3>🏃 Physical Activity</h3>
-        <div class="subtitle">
-            How active were you today?
-        </div>
+        <div class="subtitle">How active were you today?</div>
 
         <input class="slider" id="exercise" type="range" min="1" max="5" value="3">
 
         <div class="labels">
             <span>None</span>
-            <span>Very Active</span>
-        </div>
-
-        <div class="score-badge" id="exerciseLabel">
-            Score: 3
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>🥗 Nutrition</h3>
-        <div class="subtitle">
-            How healthy were your food choices today?
-        </div>
-
-        <input class="slider" id="nutrition" type="range" min="1" max="5" value="3">
-
-        <div class="labels">
-            <span>Poor</span>
-            <span>Excellent</span>
-        </div>
-
-        <div class="score-badge" id="nutritionLabel">
-            Score: 3
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>😴 Sleep</h3>
-        <div class="subtitle">
-            How well did you sleep?
-        </div>
-
-        <input class="slider" id="sleep" type="range" min="1" max="5" value="3">
-
-        <div class="labels">
-            <span>Poor</span>
-            <span>Excellent</span>
-        </div>
-
-        <div class="score-badge" id="sleepLabel">
-            Score: 3
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>🚭 Tobacco Status</h3>
-        <div class="subtitle">
-            Did you use tobacco today?
-        </div>
-
-        <div class="chips">
-            <div class="chip selected" onclick="setTobacco(false,this)">
-                No
-            </div>
-
-            <div class="chip" onclick="setTobacco(true,this)">
-                Yes
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>🩺 Screening Status</h3>
-
-        <div class="subtitle">
-            What best describes your screening status?
-        </div>
-
-        <div class="chips screening-group">
-
-            <div class="chip selected"
-                 onclick="setScreening('up_to_date',this)">
-                 Up To Date
-            </div>
-
-            <div class="chip"
-                 onclick="setScreening('due_soon',this)">
-                 Due Soon
-            </div>
-
-            <div class="chip"
-                 onclick="setScreening('overdue',this)">
-                 Overdue
-            </div>
-
-            <div class="chip"
-                 onclick="setScreening('not_sure',this)">
-                 Not Sure
-            </div>
-
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>💡 Healthy Goal For Tomorrow</h3>
-
-        <div class="subtitle">
-            Optional reflection
-        </div>
-
-        <textarea id="reflection"
-                  placeholder="Example: Walk 30 minutes, eat more vegetables, schedule a screening appointment..."></textarea>
-    </div>
-
-    <div class="card">
-        <h3>📘 Prevention Insight</h3>
-
-        <div class="insight">
-            Consistent physical activity, healthy nutrition, adequate sleep,
-            and avoiding tobacco are important steps toward better long-term health.
-        </div>
-    </div>
-
-</div>
-
-<button class="save-btn" onclick="saveCheckin()">
-    Save Today's Check-In
-</button>
-
-<div id="result" class="result"></div>
-
-<div class="footer">
-    CancerLess • Prevention & Wellness Tracking
-</div>
-
-<script>
-
-let tobaccoUsed = false;
-let screeningStatus = "up_to_date";
-
-function updateWellness(){
-
-    const exercise =
-        parseInt(document.getElementById('exercise').value);
-
-    const nutrition =
-        parseInt(document.getElementById('nutrition').value);
-
-    const sleep =
-        parseInt(document.getElementById('sleep').value);
-
-    let score =
-        exercise +
-        nutrition +
-        sleep;
-
-    if(!tobaccoUsed){
-        score += 3;
-    }
-
-    if(screeningStatus === "up_to_date"){
-        score += 2;
-    }
-
-    document.getElementById('wellnessScore').innerText =
-        score;
-}
-
-function bindSlider(id,labelId){
-
-    const slider =
-        document.getElementById(id);
-
-    slider.addEventListener('input',()=>{
-
-        document.getElementById(labelId)
-            .innerHTML =
-            "Score: " + slider.value;
-
-        updateWellness();
-    });
-
-}
-
-bindSlider('exercise','exerciseLabel');
-bindSlider('nutrition','nutritionLabel');
-bindSlider('sleep','sleepLabel');
-
-function setTobacco(value,element){
-
-    tobaccoUsed = value;
-
-    const parent =
-        element.parentElement;
-
-    parent.querySelectorAll('.chip').forEach(c=>{
-        c.classList.remove('selected');
-    });
-
-    element.classList.add('selected');
-
-    updateWellness();
-}
-
-function setScreening(value,element){
-
-    screeningStatus = value;
-
-    document
-      .querySelector('.screening-group')
-      .querySelectorAll('.chip')
-      .forEach(c=>{
-         c.classList.remove('selected');
-      });
-
-    element.classList.add('selected');
-
-    updateWellness();
-}
-
-updateWellness();
-
-function saveCheckin(){
-
-    const data = {
-
-        date:
-            new Date().toISOString(),
-
-        exercise:
-            parseInt(document.getElementById('exercise').value),
-
-        nutrition:
-            parseInt(document.getElementById('nutrition').value),
-
-        sleep:
-            parseInt(document.getElementById('sleep').value),
-
-        tobacco:
-            tobaccoUsed,
-
-        screeningStatus:
-            screeningStatus,
-
-        reflection:
-            document.getElementById('reflection').value,
-
-        wellnessScore:
-            parseInt(document.getElementById('wellnessScore').innerText)
-    };
-
-    localStorage.setItem(
-        "cancerless_daily_checkin",
-        JSON.stringify(data)
-    );
-
-    document.getElementById('result').style.display='block';
-
-    document.getElementById('result').innerHTML =
-    `
-    <h3>✅ Check-In Saved</h3>
-
-    <p>
-        Wellness Score:
-        <strong>${data.wellnessScore}</strong>
-    </p>
-
-    <p style="margin-top:10px;">
-        Great job investing in your future health today.
-    </p>
-    `;
-
-    window.scrollTo({
-        top:document.body.scrollHeight,
-        behavior:'smooth'
-    });
-}
-</script>
-
-</body>
-</html>
