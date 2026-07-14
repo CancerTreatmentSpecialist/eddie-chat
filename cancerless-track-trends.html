@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CancerLess — Track & Trends</title>
+<style>
+  :root{
+    --bg:#ffffff; --ink:#1a2238; --muted:#5d6b85; --line:#e3e8f0;
+    --brand:#2bb3b3; --brand-deep:#1d8f8f; --brand-soft:#eafafa;
+    --amber:#f5a524; --amber-soft:#fff3e0;
+    --radius:16px; --shadow:0 6px 24px rgba(29,143,143,.10); font-size:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#f6f9fb;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:520px;margin:0 auto;padding:0 0 40px}
+
+  .hero{padding:26px 20px 30px;background:linear-gradient(160deg,#2bb3b3 0%,#1d6f9f 100%);color:#fff;}
+  .hero h1{font-size:1.5rem;margin:0 0 4px;font-weight:750;letter-spacing:-.01em}
+  .hero p{margin:0;opacity:.92;font-size:.92rem}
+
+  .content{padding:0 18px;margin-top:-18px}
+
+  .card{background:#fff;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+  .card h2{font-size:1.02rem;margin:0 0 14px;font-weight:700}
+
+  /* Score card */
+  .score-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .score-label{font-size:.82rem;color:var(--muted);margin-bottom:2px}
+  .score-value{font-size:2.1rem;font-weight:800;color:var(--brand-deep);line-height:1}
+  .score-max{font-size:1.1rem;color:var(--muted);font-weight:600}
+  .streak-pill{display:flex;align-items:center;gap:6px;background:var(--amber-soft);color:#9a6a13;padding:9px 14px;border-radius:99px;font-weight:700;font-size:.88rem;white-space:nowrap}
+
+  /* Category bars */
+  .cat{margin-bottom:16px}
+  .cat:last-child{margin-bottom:0}
+  .cat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .cat-name{display:flex;align-items:center;gap:8px;font-weight:650;font-size:.95rem}
+  .cat-pct{font-weight:700;font-size:.92rem;color:var(--brand-deep)}
+  .bar-track{height:9px;border-radius:99px;background:var(--line);overflow:hidden}
+  .bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand-deep));transition:width .5s ease}
+
+  /* toggle */
+  .toggle-row{display:flex;gap:6px;margin-bottom:16px}
+  .toggle-btn{flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-weight:650;font-size:.85rem;color:var(--muted);cursor:pointer;transition:.15s}
+  .toggle-btn.active{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-deep)}
+
+  .panel{display:none}
+  .panel.active{display:block}
+
+  /* trend chart */
+  .chart-wrap{position:relative}
+  canvas{width:100%;display:block}
+  .chart-empty{text-align:center;color:var(--muted);font-size:.88rem;padding:30px 10px}
+  .legend{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:6px}
+
+  .empty-state{text-align:center;padding:20px 10px;color:var(--muted);font-size:.9rem}
+  .footnote{font-size:.74rem;color:var(--muted);text-align:center;margin-top:6px;line-height:1.5;padding:0 18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Track &amp; Trends</h1>
+    <p>See how your daily habits are adding up over time.</p>
+  </div>
+
+  <div class="content">
+
+    <!-- Score / Streak -->
+    <div class="card">
+      <div class="score-row">
+        <div>
+          <div class="score-label" id="scoreLabel">Current Wellness Score</div>
+          <div class="score-value"><span id="scoreValue">—</span><span class="score-max" id="scoreMax"></span></div>
+        </div>
+        <div class="streak-pill">🔥 <span id="streakValue">—</span> Day Streak</div>
+      </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="card">
+      <h2>Wellness Breakdown</h2>
+
+      <div class="toggle-row">
+        <button class="toggle-btn active" data-panel="today">Today</button>
+        <button class="toggle-btn" data-panel="week">7-Day Avg</button>
+      </div>
+
+      <div class="panel active" id="panel-today">
+        <div class="cat">
+          <div class="cat-top"><span class="cat-name">🏃 Activity</span><span class="cat-pct" id="t-activity-pct">—</span></div>
+          <div class="bar-track"><div class="bar-fill" id="t-activity-bar" style="width:0%"></div></div>
+        </div>
+        <div class="cat">
+          <div class="cat-top"><span class="cat-name">🥗 Nutrition</span><span class="cat-pct" id="t-nutrition-pct">—</span></div>
+          <div class="bar-track"><div class="bar-fill" id="t-nutrition-bar" style="width:0%"></div></div>
+        </div>
+        <div class="cat">
+          <div class="cat-top"><span class="cat-name">😴 Sleep</span><span class="cat-pct" id="t-sleep-pct">—</span></div>
+          <div class="bar-track"><div class="bar-fill" id="t-sleep-bar" style="width:0%"></div></div>
+        </div>
+        <div class="cat">
+          <div class="cat-top"><span class="cat-name">🚭 Tobacco Free</span><span class="cat-pct" id="t-tobacco-pct">—</span></div>
+          <div class="bar-track"><div class="bar-fill" id="t-tobacco-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-week">
+        <div class="cat">
+          <div class="cat-top"><span class="cat-name">🏃 Activity</span><span class="cat-pct" id="w-activity-pct">—</span></div>
+          <div class="bar-track"><div class="bar-fill" id="w-activity-bar" style="width:0%"></div></div>
+        </div>
+        <div class="cat">
+          <div class="cat-top"><span class="cat-name">🥗 Nutrition</span><span class="cat-pct" id="w-nutrition-pct">—</span></div>
+          <div class="bar-track"><div class="bar-fill" id="w-nutrition-bar" style="width:0%"></div></div>
+        </div>
+        <div class="cat">
+          <div class="cat-top"><span class="cat-name">😴 Sleep</span><span class="cat-pct" id="w-sleep-pct">—</span></div>
+          <div class="bar-track"><div class="bar-fill" id="w-sleep-bar" style="width:0%"></div></div>
+        </div>
+        <div class="cat">
+          <div class="cat-top"><span class="cat-name">🚭 Tobacco Free</span><span class="cat-pct" id="w-tobacco-pct">—</span></div>
+          <div class="bar-track"><div class="bar-fill" id="w-tobacco-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 30-day trend -->
+    <div class="card">
+      <h2>30-Day Wellness Trend</h2>
+      <div class="chart-wrap" id="chartWrap">
+        <canvas id="trendChart" width="480" height="180"></canvas>
+      </div>
+      <div class="legend" id="chartLegend" style="display:none">
+        <span id="legendStart">30 days ago</span>
+        <span id="legendEnd">Today</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footnote">CancerLess by Cancer Treatment Specialist, PC · For educational use only.<br>Not a substitute for professional medical advice.</div>
+</div>
+
+<script>
+/* ============================================================
+   DATA CONTRACT — this page reads everything from URL query params.
+   FlutterFlow builds the Webview URL by concatenating this file's
+   base URL with a query string built from bound Firestore/state values.
+
+   Supported params (all optional — page degrades gracefully if missing):
+
+     score          number   e.g. 18            -> today's wellness score
+     maxScore       number   e.g. 20             -> denominator shown next to score
+     streak         number   e.g. 7              -> current day streak
+
+     activity       number 0-100  -> today's activity %
+     nutrition      number 0-100  -> today's nutrition %
+     sleep          number 0-100  -> today's sleep %
+     tobacco        number 0-100  -> today's tobacco-free %
+
+     w_activity     number 0-100  -> 7-day avg activity %
+     w_nutrition    number 0-100  -> 7-day avg nutrition %
+     w_sleep        number 0-100  -> 7-day avg sleep %
+     w_tobacco      number 0-100  -> 7-day avg tobacco-free %
+
+     trend          comma-separated numbers, oldest -> newest, 0-100 scale,
+                    up to 30 values, e.g. trend=40,55,60,58,72,...
+                    -> plots the 30-day line/bar chart
+
+   Example URL FlutterFlow would build:
+   https://.../cancerless-track-trends.html?score=18&maxScore=20&streak=7
+     &activity=80&nutrition=85&sleep=75&tobacco=100
+     &w_activity=70&w_nutrition=78&w_sleep=65&w_tobacco=95
+     &trend=40,55,60,58,72,80,75,...
+   ============================================================ */
+
+function getParams(){
+  const p = new URLSearchParams(window.location.search);
+  const num = (key, fallback=null) => {
+    const v = p.get(key);
+    if(v===null || v==='') return fallback;
+    const n = parseFloat(v);
+    return isNaN(n) ? fallback : n;
+  };
+  const trendRaw = p.get('trend');
+  let trend = [];
+  if(trendRaw){
+    trend = trendRaw.split(',').map(s=>parseFloat(s)).filter(n=>!isNaN(n));
+  }
+  return {
+    score: num('score'),
+    maxScore: num('maxScore', 20),
+    streak: num('streak'),
+    activity: num('activity'),
+    nutrition: num('nutrition'),
+    sleep: num('sleep'),
+    tobacco: num('tobacco'),
+    w_activity: num('w_activity'),
+    w_nutrition: num('w_nutrition'),
+    w_sleep: num('w_sleep'),
+    w_tobacco: num('w_tobacco'),
+    trend
+  };
+}
+
+function setBar(prefix, value){
+  const bar = document.getElementById(prefix+'-bar');
+  const pct = document.getElementById(prefix+'-pct');
+  if(value===null || value===undefined){
+    pct.textContent = '—';
+    bar.style.width = '0%';
+    return;
+  }
+  const clamped = Math.max(0, Math.min(100, value));
+  bar.style.width = clamped + '%';
+  pct.textContent = Math.round(clamped) + '%';
+}
+
+function renderScore(d){
+  document.getElementById('scoreValue').textContent = (d.score===null) ? '—' : Math.round(d.score);
+  document.getElementById('scoreMax').textContent = (d.score===null) ? '' : ('/' + d.maxScore);
+  document.getElementById('streakValue').textContent = (d.streak===null) ? '—' : Math.round(d.streak);
+}
+
+function renderBreakdown(d){
+  setBar('t-activity', d.activity);
+  setBar('t-nutrition', d.nutrition);
+  setBar('t-sleep', d.sleep);
+  setBar('t-tobacco', d.tobacco);
+
+  setBar('w-activity', d.w_activity);
+  setBar('w-nutrition', d.w_nutrition);
+  setBar('w-sleep', d.w_sleep);
+  setBar('w-tobacco', d.w_tobacco);
+}
+
+function renderTrend(trend){
+  const canvas = document.getElementById('trendChart');
+  const wrap = document.getElementById('chartWrap');
+  const legend = document.getElementById('chartLegend');
+
+  if(!trend || trend.length < 2){
+    canvas.style.display='none';
+    const empty = document.createElement('div');
+    empty.className='chart-empty';
+    empty.textContent = 'Keep logging daily check-ins — your 30-day trend will appear here once there\'s enough history.';
+    wrap.appendChild(empty);
+    return;
+  }
+
+  legend.style.display='flex';
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pad = {top:14, right:10, bottom:14, left:10};
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  ctx.clearRect(0,0,W,H);
+
+  // gridlines
+  ctx.strokeStyle = '#e3e8f0';
+  ctx.lineWidth = 1;
+  for(let i=0;i<=4;i++){
+    const y = pad.top + (plotH/4)*i;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W-pad.right, y);
+    ctx.stroke();
+  }
+
+  const n = trend.length;
+  const stepX = plotW / (n-1);
+  const points = trend.map((v,i)=>{
+    const x = pad.left + stepX*i;
+    const clamped = Math.max(0, Math.min(100, v));
+    const y = pad.top + plotH - (clamped/100)*plotH;
+    return {x,y};
+  });
+
+  // filled area
+  const grad = ctx.createLinearGradient(0,pad.top,0,pad.top+plotH);
+  grad.addColorStop(0, 'rgba(43,179,179,0.28)');
+  grad.addColorStop(1, 'rgba(43,179,179,0.02)');
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, pad.top+plotH);
+  points.forEach(pt=>ctx.lineTo(pt.x, pt.y));
+  ctx.lineTo(points[points.length-1].x, pad.top+plotH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // line
+  ctx.beginPath();
+  points.forEach((pt,i)=> i===0 ? ctx.moveTo(pt.x,pt.y) : ctx.lineTo(pt.x,pt.y));
+  ctx.strokeStyle = '#1d8f8f';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // last point marker
+  const last = points[points.length-1];
+  ctx.beginPath();
+  ctx.arc(last.x, last.y, 4.5, 0, Math.PI*2);
+  ctx.fillStyle = '#1d8f8f';
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function wireToggle(){
+  const buttons = document.querySelectorAll('.toggle-btn');
+  buttons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      buttons.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      document.getElementById('panel-'+btn.dataset.panel).classList.add('active');
+    });
+  });
+}
+
+function init(){
+  const d = getParams();
+  renderScore(d);
+  renderBreakdown(d);
+  renderTrend(d.trend);
+  wireToggle();
+}
+
+init();
+</script>
+</body>
+</html>
