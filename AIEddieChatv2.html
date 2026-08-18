@@ -1,94 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport"
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
 content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <title>Ask Eddie AI</title>
 
 <style>
 
+:root{
+  --eddie-dark:#0C6D7F;
+  --eddie-light:#21C4C7;
+  --background:#EEF7F8;
+  --card:#FFFFFF;
+  --status:#7CFF9D;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
 html,
 body{
-    margin:0;
-    padding:0;
-    height:100%;
-    width:100%;
-    overflow:hidden;
-    background:#eef7f8;
-    font-family:-apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--background);
+  font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      Helvetica,
+      Arial,
+      sans-serif;
 }
 
-/* Main Container */
+.app-container{
+  width:100%;
+  height:100vh;
 
-.chat-wrapper{
-    height:100vh;
-    width:100%;
-    padding:12px;
-    box-sizing:border-box;
+  padding-top:max(12px, env(safe-area-inset-top));
+  padding-left:12px;
+  padding-right:12px;
+  padding-bottom:max(12px, env(safe-area-inset-bottom));
 }
-
-/* Card */
 
 .chat-card{
-    height:100%;
-    width:100%;
-    background:white;
-    border-radius:24px;
-    overflow:hidden;
+  width:100%;
+  height:100%;
 
-    box-shadow:
-      0 10px 30px rgba(0,0,0,.10);
+  background:#fff;
+
+  border-radius:28px;
+
+  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
+
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.08),
+    0 18px 40px rgba(0,0,0,.12);
 }
 
-/* Header */
-
 .chat-header{
-
-    background:
-    linear-gradient(
+  background:linear-gradient(
     135deg,
-    #0C6D7F,
-    #21C4C7
-    );
+    var(--eddie-dark),
+    var(--eddie-light)
+  );
 
-    color:white;
+  color:white;
 
-    padding:18px;
+  padding:18px 20px;
 
-    display:flex;
-    flex-direction:column;
+  flex-shrink:0;
 }
 
 .title{
-    font-size:24px;
-    font-weight:700;
+  font-size:28px;
+  font-weight:700;
+  line-height:1.1;
 }
 
 .subtitle{
-    font-size:14px;
-    opacity:.95;
+  margin-top:4px;
+  font-size:15px;
+  opacity:.95;
 }
 
 .status{
-    margin-top:6px;
-    font-size:12px;
+  margin-top:8px;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
 
 .status-dot{
-    color:#7CFF9D;
+  color:var(--status);
 }
 
-/* Chat Frame */
-
 .chat-frame{
-    height:calc(100% - 95px);
-    width:100%;
-    border:none;
+  flex:1;
+  width:100%;
+  border:none;
+  background:white;
+}
+
+@media(max-width:600px){
+
+  .title{
+    font-size:24px;
+  }
+
+  .subtitle{
+    font-size:14px;
+  }
+
 }
 
 </style>
@@ -96,30 +132,35 @@ body{
 
 <body>
 
-<div class="chat-wrapper">
+<div class="app-container">
 
-    <div class="chat-card">
+  <div class="chat-card">
 
-        <div class="chat-header">
+    <div class="chat-header">
 
-            <div class="title">
-                Eddie AI
-            </div>
+      <div class="title">
+        Eddie AI
+      </div>
 
-            <div class="subtitle">
-                Your Cancer Education Copilot
-            </div>
+      <div class="subtitle">
+        Your Cancer Education Copilot
+      </div>
 
-            <div class="status">
-                <span class="status-dot">●</span>
-                Online
-            </div>
-
-        </div>
-
-        <https://copilotstudio.microsoft.com/environments/Default-55392b7f-41f9-468a-8aae-c256bc68afe5/bots/Default_eddie/webchat?__version__=2>
+      <div class="status">
+        <span class="status-dot">●</span>
+        Online
+      </div>
 
     </div>
+
+    <iframe
+      class="chat-frame"
+      src="https://copilotstudio.microsoft.com/environments/Default-55392b7f-41f9-468a-8aae-c256bc68afe5/bots/Default_eddie/webchat?__version__=2"
+      allow="microphone"
+      frameborder="0">
+    </iframe>
+
+  </div>
 
 </div>
 
