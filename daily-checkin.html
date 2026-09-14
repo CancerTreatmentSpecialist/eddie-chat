@@ -6,6 +6,10 @@
 
 <title>CancerLess Daily Prevention Check-In</title>
 
+<!-- Firebase SDKs (compat, works without a build step) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <style>
 *{
     margin:0;
@@ -179,6 +183,11 @@ textarea{
     cursor:pointer;
 }
 
+.save-btn:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+}
+
 .result{
     display:none;
     margin:0 18px 18px;
@@ -197,11 +206,13 @@ textarea{
 }
 
 .error-box{
+    display:none;
     background:#dc2626;
     color:white;
-    padding:10px;
-    margin:10px;
-    border-radius:8px;
+    padding:14px;
+    margin:0 18px 18px;
+    border-radius:12px;
+    text-align:center;
 }
 </style>
 </head>
@@ -237,6 +248,10 @@ textarea{
 
     </div>
 
+</div>
+
+<div id="userError" class="error-box">
+No user detected. Please open this page from within the CancerLess app.
 </div>
 
 <div class="section">
@@ -321,6 +336,21 @@ Did you use tobacco today?
 
 <div class="card">
 
+<h3>🍷 Alcohol Status</h3>
+
+<div class="subtitle">
+Did you drink alcohol today?
+</div>
+
+<div class="chips">
+<div class="chip selected" onclick="setAlcohol(false,this)">No</div>
+<div class="chip" onclick="setAlcohol(true,this)">Yes</div>
+</div>
+
+</div>
+
+<div class="card">
+
 <h3>🩺 Screening Status</h3>
 
 <div class="subtitle">
@@ -355,14 +385,14 @@ placeholder="Walk 30 minutes, eat more vegetables, schedule a screening appointm
 
 <div class="insight">
 Consistent physical activity, healthy nutrition, adequate sleep,
-and avoiding tobacco are important steps toward better long-term wellness.
+and avoiding tobacco and alcohol are important steps toward better long-term wellness.
 </div>
 
 </div>
 
 </div>
 
-<button class="save-btn" onclick="saveCheckin()">
+<button class="save-btn" id="saveBtn" onclick="saveCheckin()">
 Save Today's Check-In
 </button>
 
@@ -379,7 +409,31 @@ window.onerror=function(msg){
 console.log(msg);
 };
 
+const firebaseConfig = {
+  apiKey: "AIzaSyD9QAG0NDfjQ05-WhYJdmcaS8GazK3M8rY",
+  authDomain: "cancer-less-rka8v5.firebaseapp.com",
+  projectId: "cancer-less-rka8v5",
+  storageBucket: "cancer-less-rka8v5.firebasestorage.app",
+  messagingSenderId: "72804578972",
+  appId: "1:72804578972:web:18629d753ec85a1e155f59"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ---------- GET LOGGED-IN USER ----------
+// Expects the WebView URL to include ?uid=THE_USERS_UID
+// e.g. https://.../daily-checkin.html?uid=abc123
+const urlParams = new URLSearchParams(window.location.search);
+const currentUserId = urlParams.get('uid');
+
+if(!currentUserId){
+document.getElementById('userError').style.display='block';
+document.getElementById('saveBtn').disabled = true;
+}
+
 let tobaccoUsed=false;
+let alcoholUsed=false;
 let screeningStatus="up_to_date";
 
 function updateWellness(){
@@ -391,6 +445,10 @@ const sleep=parseInt(document.getElementById('sleep').value||0);
 let score=exercise+nutrition+sleep;
 
 if(!tobaccoUsed){
+score+=3;
+}
+
+if(!alcoholUsed){
 score+=3;
 }
 
@@ -429,55 +487,9 @@ element.classList.add('selected');
 updateWellness();
 }
 
-function setScreening(value,element){
+function setAlcohol(value,element){
 
-screeningStatus=value;
+alcoholUsed=value;
 
-document.querySelectorAll('.screening-group .chip')
-.forEach(c=>c.classList.remove('selected'));
-
-element.classList.add('selected');
-
-updateWellness();
-}
-
-function saveCheckin(){
-
-const score=document.getElementById('wellnessScore').textContent;
-
-try{
-
-localStorage.setItem(
-"cancerless_daily_checkin",
-JSON.stringify({
-date:new Date().toISOString(),
-score:score,
-reflection:document.getElementById('reflection').value
-})
-);
-
-}catch(e){}
-
-const result=document.getElementById('result');
-
-result.style.display='block';
-
-result.innerHTML=
-'<h3>✅ Check-In Saved</h3>'+
-'<p style="margin-top:10px;">Wellness Score: <strong>'+score+'</strong></p>'+
-'<p style="margin-top:10px;">Great job investing in your future health today.</p>';
-}
-
-document.addEventListener('DOMContentLoaded',function(){
-
-bindSlider('exercise','exerciseLabel');
-bindSlider('nutrition','nutritionLabel');
-bindSlider('sleep','sleepLabel');
-
-updateWellness();
-
-});
-</script>
-
-</body>
-</html>
+element.parentElement.querySelectorAll('.chip')
+.forEach(c=>c.classList.remove('sele
