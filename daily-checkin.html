@@ -492,4 +492,95 @@ function setAlcohol(value,element){
 alcoholUsed=value;
 
 element.parentElement.querySelectorAll('.chip')
-.forEach(c=>c.classList.remove('sele
+.forEach(c=>c.classList.remove('selected'));
+
+element.classList.add('selected');
+
+updateWellness();
+}
+
+function setScreening(value,element){
+
+screeningStatus=value;
+
+element.parentElement.querySelectorAll('.chip')
+.forEach(c=>c.classList.remove('selected'));
+
+element.classList.add('selected');
+
+updateWellness();
+}
+
+function saveCheckin(){
+
+if(!currentUserId){
+return;
+}
+
+const saveBtn=document.getElementById('saveBtn');
+saveBtn.disabled=true;
+saveBtn.textContent="Saving...";
+
+const exercise=parseInt(document.getElementById('exercise').value||0);
+const nutrition=parseInt(document.getElementById('nutrition').value||0);
+const sleep=parseInt(document.getElementById('sleep').value||0);
+const reflection=document.getElementById('reflection').value||"";
+
+let wellnessScore=exercise+nutrition+sleep;
+if(!tobaccoUsed){ wellnessScore+=3; }
+if(!alcoholUsed){ wellnessScore+=3; }
+if(screeningStatus==="up_to_date"){ wellnessScore+=2; }
+
+const checkinData={
+userId: currentUserId,
+exercise: exercise,
+nutrition: nutrition,
+sleep: sleep,
+tobaccoUsed: tobaccoUsed,
+alcoholUsed: alcoholUsed,
+screeningStatus: screeningStatus,
+reflection: reflection,
+wellnessScore: wellnessScore,
+createdTime: firebase.firestore.FieldValue.serverTimestamp()
+};
+
+db.collection('daily_logs').add(checkinData)
+.then(function(){
+
+saveBtn.disabled=false;
+saveBtn.textContent="Save Today's Check-In";
+
+const result=document.getElementById('result');
+result.style.display='block';
+result.innerHTML=
+"<strong>✅ Check-in saved!</strong><br>Today's wellness score: "+wellnessScore;
+
+})
+.catch(function(error){
+
+console.log(error);
+
+saveBtn.disabled=false;
+saveBtn.textContent="Save Today's Check-In";
+
+const result=document.getElementById('result');
+result.style.display='block';
+result.style.background='#fee2e2';
+result.style.borderColor='#fca5a5';
+result.innerHTML=
+"<strong>Something went wrong saving your check-in.</strong><br>Please try again.";
+
+});
+}
+
+// ---------- INITIALIZE ----------
+bindSlider('exercise','exerciseLabel');
+bindSlider('nutrition','nutritionLabel');
+bindSlider('sleep','sleepLabel');
+
+updateWellness();
+
+</script>
+
+</body>
+</html>
