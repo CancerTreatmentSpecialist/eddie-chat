@@ -7,21 +7,22 @@
 <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
 <style>
   :root { --brand: #C1664B; /* replace with your app's header color */
+          --radius: 14px;   /* corner rounding for chips and chat bubbles */
           --muted: #6b7280; --bg: #fafafa; --border: #e5e7eb; }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg);
     font-family: -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
   body { display: flex; flex-direction: column; height: 100dvh; }
 
-  /* Starter question chips */
-  #chips { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px 6px; flex-shrink: 0;
-           -webkit-overflow-scrolling: touch; }
-  #chips button { flex-shrink: 0; border: 1px solid var(--brand); color: var(--brand); background: #fff;
-                  border-radius: 18px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  /* Starter question chips — 2x2 grid */
+  #chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 12px 8px; flex-shrink: 0; }
+  #chips button { border: 1px solid var(--brand); color: var(--brand); background: #fff; border-radius: var(--radius);
+                  padding: 9px 8px; font-size: 14px; line-height: 1.25; white-space: normal; cursor: pointer; }
 
   /* Chat fills the remaining screen */
   #webchat { flex: 1; min-height: 0; }
-  #webchat .webchat__bubble__content { font-size: 16px; line-height: 1.45; }
+  #webchat .webchat__bubble__content { font-size: 16px; line-height: 1.45;
+                                       border-radius: var(--radius) !important; overflow: hidden; }
   #webchat input, #webchat textarea { font-size: 16px !important; } /* stops iPhone zoom */
 
   /* Disclaimer (keep — Apple required this) */
@@ -33,10 +34,10 @@
 </head>
 <body>
   <div id="chips" aria-label="Suggested questions">
-    <button>Explain my diagnosis in plain terms</button>
-    <button>What questions should I ask my doctor?</button>
-    <button>What do cancer stages mean?</button>
-    <button>How can I lower my cancer risk?</button>
+    <button data-q="Explain my diagnosis in plain terms">Explain my diagnosis</button>
+    <button data-q="What questions should I ask my doctor?">Questions for my doctor</button>
+    <button data-q="What do cancer stages mean?">What do stages mean?</button>
+    <button data-q="How can I lower my cancer risk?">Lower my cancer risk</button>
   </div>
 
   <div id="webchat" role="main"></div>
@@ -48,6 +49,7 @@
 <script>
 (async function () {
   const BRAND = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim();
+  const RADIUS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--radius'), 10) || 14;
   const chips = document.getElementById('chips');
 
   try {
@@ -80,10 +82,10 @@
       return next(action);
     });
 
-    // Tapping a chip sends it as a message
+    // Tapping a chip sends its full question
     chips.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', () => {
-        store.dispatch({ type: 'WEB_CHAT/SEND_MESSAGE', payload: { text: btn.textContent } });
+        store.dispatch({ type: 'WEB_CHAT/SEND_MESSAGE', payload: { text: btn.dataset.q } });
       });
     });
 
@@ -91,10 +93,16 @@
       bubbleMaxWidth: 1400,               // full-width replies
       hideUploadButton: true,
       backgroundColor: '#fafafa',
-      bubbleBorderRadius: 12,
-      bubbleFromUserBorderRadius: 12,
+
+      // Rounded corners on all bubbles, no "tail" corners
+      bubbleBorderRadius: RADIUS,
+      bubbleFromUserBorderRadius: RADIUS,
+      bubbleNubSize: 0,
+      bubbleFromUserNubSize: 0,
+
       bubbleFromUserBackground: BRAND,
       bubbleFromUserTextColor: '#ffffff',
+      bubbleFromUserBorderColor: BRAND,
       sendBoxButtonColor: BRAND
     };
 
