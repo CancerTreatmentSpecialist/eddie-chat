@@ -27,7 +27,7 @@
   #webchat > div { height: 100%; }
   #webchat .webchat__bubble__content { font-size: 16px; line-height: 1.45;
                                        border-radius: var(--radius) !important; overflow: hidden; }
-  #webchat input, #webchat textarea { font-size: 16px !important; } /* stops iPhone zoom */
+  #webchat input, #webchat textarea { font-size: 16px !important; line-height: 1.4; } /* stops iPhone zoom */
 
   /* Disclaimer (keep — Apple required this) */
   .disclaimer { flex-shrink: 0; font-size: 11px; color: var(--muted); text-align: center; background: #fff;
@@ -107,6 +107,12 @@
       bubbleFromUserBackground: BRAND,
       bubbleFromUserTextColor: '#ffffff',
       bubbleFromUserBorderColor: BRAND,
+
+      // Larger, easier-to-tap typing bar
+      sendBoxHeight: 52,                  // was ~40 by default
+      sendBoxTextWrap: true,              // long questions wrap instead of scrolling sideways
+      sendBoxBackground: '#ffffff',
+      sendBoxBorderTop: 'solid 1px #e5e7eb',
       sendBoxButtonColor: BRAND
     };
 
