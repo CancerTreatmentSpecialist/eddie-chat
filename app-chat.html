@@ -10,17 +10,21 @@
           --radius: 14px;   /* corner rounding for chips and chat bubbles */
           --muted: #6b7280; --bg: #fafafa; --border: #e5e7eb; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: var(--bg);
+
+  /* Lock the page so only the chat scrolls (keeps chips in place) */
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--bg);
     font-family: -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
   body { display: flex; flex-direction: column; height: 100dvh; }
 
-  /* Starter question chips — 2x2 grid */
-  #chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 12px 8px; flex-shrink: 0; }
+  /* Starter question chips — 2x2 grid, clear of the iPhone status bar */
+  #chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0;
+           padding: calc(12px + env(safe-area-inset-top)) 12px 8px; background: var(--bg); }
   #chips button { border: 1px solid var(--brand); color: var(--brand); background: #fff; border-radius: var(--radius);
                   padding: 9px 8px; font-size: 14px; line-height: 1.25; white-space: normal; cursor: pointer; }
 
-  /* Chat fills the remaining screen */
-  #webchat { flex: 1; min-height: 0; }
+  /* Chat fills the remaining screen and scrolls on its own */
+  #webchat { flex: 1; min-height: 0; position: relative; }
+  #webchat > div { height: 100%; }
   #webchat .webchat__bubble__content { font-size: 16px; line-height: 1.45;
                                        border-radius: var(--radius) !important; overflow: hidden; }
   #webchat input, #webchat textarea { font-size: 16px !important; } /* stops iPhone zoom */
