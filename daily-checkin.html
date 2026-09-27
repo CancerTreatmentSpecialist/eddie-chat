@@ -181,21 +181,44 @@ textarea{
     font-weight:700;
     background:linear-gradient(135deg,#20c6c9,#0057a8);
     cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+}
+
+.save-btn:active{
+    transform:scale(.98);
 }
 
 .save-btn:disabled{
     opacity:.6;
-    cursor:not-allowed;
+    cursor:wait;
 }
 
 .result{
     display:none;
     margin:0 18px 18px;
-    background:#ecfdf5;
-    border:1px solid #86efac;
     border-radius:18px;
     padding:20px;
     text-align:center;
+    line-height:1.5;
+}
+
+.result.success{
+    display:block;
+    background:#ecfdf5;
+    border:1px solid #86efac;
+}
+
+.result.error{
+    display:block;
+    background:#fee2e2;
+    border:1px solid #fca5a5;
+}
+
+.result .detail{
+    display:block;
+    margin-top:6px;
+    font-size:12px;
+    color:#6b7280;
 }
 
 .footer{
@@ -203,16 +226,6 @@ textarea{
     color:#6b7280;
     font-size:12px;
     padding:20px;
-}
-
-.error-box{
-    display:none;
-    background:#dc2626;
-    color:white;
-    padding:14px;
-    margin:0 18px 18px;
-    border-radius:12px;
-    text-align:center;
 }
 </style>
 </head>
@@ -248,10 +261,6 @@ textarea{
 
     </div>
 
-</div>
-
-<div id="userError" class="error-box">
-No user detected. Please open this page from within the CancerLess app.
 </div>
 
 <div class="section">
@@ -392,11 +401,11 @@ and avoiding tobacco and alcohol are important steps toward better long-term wel
 
 </div>
 
-<button class="save-btn" id="saveBtn" onclick="saveCheckin()">
+<button type="button" class="save-btn" id="saveBtn" onclick="saveCheckin()">
 Save Today's Check-In
 </button>
 
-<div id="result" class="result"></div>
+<div id="result" class="result" role="status" aria-live="polite"></div>
 
 <div class="footer">
 CancerLess • Prevention & Wellness Tracking
@@ -422,154 +431,118 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ---------- GET LOGGED-IN USER ----------
-// Expects the WebView URL to include ?uid=THE_USERS_UID
-// e.g. https://.../daily-checkin.html?uid=abc123
+// The WebView URL passes ?uid=THE_USERS_UID from FlutterFlow.
+// No banner and no disabled button: the uid is only checked when Save is tapped.
 const urlParams = new URLSearchParams(window.location.search);
-const currentUserId = urlParams.get('uid');
-
-if(!currentUserId){
-document.getElementById('userError').style.display='block';
-document.getElementById('saveBtn').disabled = true;
-}
+const currentUserId = (urlParams.get('uid') || '').trim();
 
 let tobaccoUsed=false;
 let alcoholUsed=false;
 let screeningStatus="up_to_date";
 
-function updateWellness(){
-
+function calcScore(){
 const exercise=parseInt(document.getElementById('exercise').value||0);
 const nutrition=parseInt(document.getElementById('nutrition').value||0);
 const sleep=parseInt(document.getElementById('sleep').value||0);
 
 let score=exercise+nutrition+sleep;
+if(!tobaccoUsed){ score+=3; }
+if(!alcoholUsed){ score+=3; }
+if(screeningStatus==="up_to_date"){ score+=2; }
 
-if(!tobaccoUsed){
-score+=3;
+return {exercise, nutrition, sleep, score};
 }
 
-if(!alcoholUsed){
-score+=3;
-}
-
-if(screeningStatus==="up_to_date"){
-score+=2;
-}
-
-document.getElementById('wellnessScore').textContent=score;
+function updateWellness(){
+document.getElementById('wellnessScore').textContent=calcScore().score;
 }
 
 function bindSlider(id,labelId){
-
 const slider=document.getElementById(id);
-
 if(!slider) return;
-
 slider.addEventListener('input',function(){
-
-document.getElementById(labelId).textContent=
-"Score: "+slider.value;
-
+document.getElementById(labelId).textContent="Score: "+slider.value;
 updateWellness();
-
 });
 }
 
-function setTobacco(value,element){
-
-tobaccoUsed=value;
-
+function selectChip(element){
 element.parentElement.querySelectorAll('.chip')
 .forEach(c=>c.classList.remove('selected'));
-
 element.classList.add('selected');
+}
 
+function setTobacco(value,element){
+tobaccoUsed=value;
+selectChip(element);
 updateWellness();
 }
 
 function setAlcohol(value,element){
-
 alcoholUsed=value;
-
-element.parentElement.querySelectorAll('.chip')
-.forEach(c=>c.classList.remove('selected'));
-
-element.classList.add('selected');
-
+selectChip(element);
 updateWellness();
 }
 
 function setScreening(value,element){
-
 screeningStatus=value;
-
-element.parentElement.querySelectorAll('.chip')
-.forEach(c=>c.classList.remove('selected'));
-
-element.classList.add('selected');
-
+selectChip(element);
 updateWellness();
+}
+
+function showResult(type, message, detail){
+const result=document.getElementById('result');
+result.className='result '+type;
+result.innerHTML='<strong>'+message+'</strong>'+
+(detail ? '<span class="detail">'+detail+'</span>' : '');
+result.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 function saveCheckin(){
 
+const saveBtn=document.getElementById('saveBtn');
+
 if(!currentUserId){
+showResult('error',
+'Sign in to the CancerLess app to save your check-in.',
+'Open Daily Check-In from inside the app while signed in.');
 return;
 }
 
-const saveBtn=document.getElementById('saveBtn');
 saveBtn.disabled=true;
 saveBtn.textContent="Saving...";
 
-const exercise=parseInt(document.getElementById('exercise').value||0);
-const nutrition=parseInt(document.getElementById('nutrition').value||0);
-const sleep=parseInt(document.getElementById('sleep').value||0);
+const s=calcScore();
 const reflection=document.getElementById('reflection').value||"";
-
-let wellnessScore=exercise+nutrition+sleep;
-if(!tobaccoUsed){ wellnessScore+=3; }
-if(!alcoholUsed){ wellnessScore+=3; }
-if(screeningStatus==="up_to_date"){ wellnessScore+=2; }
 
 const checkinData={
 userId: currentUserId,
-exercise: exercise,
-nutrition: nutrition,
-sleep: sleep,
+exercise: s.exercise,
+nutrition: s.nutrition,
+sleep: s.sleep,
 tobaccoUsed: tobaccoUsed,
 alcoholUsed: alcoholUsed,
 screeningStatus: screeningStatus,
 reflection: reflection,
-wellnessScore: wellnessScore,
+wellnessScore: s.score,
 createdTime: firebase.firestore.FieldValue.serverTimestamp()
 };
 
 db.collection('daily_logs').add(checkinData)
 .then(function(){
-
 saveBtn.disabled=false;
 saveBtn.textContent="Save Today's Check-In";
-
-const result=document.getElementById('result');
-result.style.display='block';
-result.innerHTML=
-"<strong>✅ Check-in saved!</strong><br>Today's wellness score: "+wellnessScore;
-
+showResult('success',
+'✅ Check-in saved!',
+"Today's wellness score: "+s.score);
 })
 .catch(function(error){
-
 console.log(error);
-
 saveBtn.disabled=false;
 saveBtn.textContent="Save Today's Check-In";
-
-const result=document.getElementById('result');
-result.style.display='block';
-result.style.background='#fee2e2';
-result.style.borderColor='#fca5a5';
-result.innerHTML=
-"<strong>Something went wrong saving your check-in.</strong><br>Please try again.";
-
+showResult('error',
+'Check-in not saved. Tap Save to try again.',
+'Error: '+((error && error.code) ? error.code : 'unknown'));
 });
 }
 
