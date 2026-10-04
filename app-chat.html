@@ -27,7 +27,22 @@
   #webchat > div { height: 100%; }
   #webchat .webchat__bubble__content { font-size: 16px; line-height: 1.45;
                                        border-radius: var(--radius) !important; overflow: hidden; }
-  #webchat input, #webchat textarea { font-size: 16px !important; line-height: 1.4; } /* stops iPhone zoom */
+
+  /* ===== SEND BOX FIX — visible textarea AND its hidden measuring copy must match ===== */
+  #webchat input,
+  #webchat textarea,
+  #webchat .webchat__auto-resize-textarea__textarea,
+  #webchat .webchat__auto-resize-textarea__doppelganger {
+    font-size: 16px !important;      /* stops iPhone zoom */
+    line-height: 1.4 !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-family: inherit !important;
+  }
+  #webchat .webchat__auto-resize-textarea { min-height: 34px; }
+  #webchat .webchat__send-box__main { min-height: 52px; align-items: center; }
+  #webchat .webchat__send-box-text-box { padding-top: 4px; padding-bottom: 4px; }
+  /* ===== END FIX ===== */
 
   /* Disclaimer (keep — Apple required this) */
   .disclaimer { flex-shrink: 0; font-size: 11px; color: var(--muted); text-align: center; background: #fff;
@@ -109,8 +124,9 @@
       bubbleFromUserBorderColor: BRAND,
 
       // Larger, easier-to-tap typing bar
-      sendBoxHeight: 52,                  // was ~40 by default
+      sendBoxHeight: 52,
       sendBoxTextWrap: true,              // long questions wrap instead of scrolling sideways
+      sendBoxMaxHeight: 140,              // grows up to ~5 lines, then scrolls
       sendBoxBackground: '#ffffff',
       sendBoxBorderTop: 'solid 1px #e5e7eb',
       sendBoxButtonColor: BRAND
