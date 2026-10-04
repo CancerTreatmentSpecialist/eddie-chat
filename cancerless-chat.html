@@ -1,1 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>CancerLess – Chat with EDDIE</title>
+<script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+<style>
+  /* ============================================================
+     CANCERLESS COLORS — the ONLY lines you need to edit.
+     Paste hex codes from FlutterFlow → Theme Settings → Colors.
+     ============================================================ */
+  :root {
+    --brand:     #1D4E89;  /* CancerLess SECONDARY (navy) — your message bubbles, chip text, send button */
+    --accent:    #38BDC5;  /* CancerLess PRIMARY (teal) — chip outlines */
+    --accent-bg: #EBF8F9;  /* primary_container (light teal) — chip fill */
+    --bg:        #F4F8FC;  /* CancerLess PRIMARY BACKGROUND — page behind the chat */
+    --surface:   #FFFFFF;  /* SECONDARY BACKGROUND — typing bar, disclaimer bar, EDDIE's bubbles */
+    --text:      #101828;  /* PRIMARY TEXT — EDDIE's reply text */
+    --muted:     #475467;  /* SECONDARY TEXT — disclaimer text */
+    --border:    #EAECF0;  /* ALTERNATE — thin divider lines */
+    --radius:  14px;     /* corner rounding for chips and bubbles */
+  }
+  /* ============================================================ */
 
+  * { box-sizing: border-box; }
+
+  /* Lock the page so only the chat scrolls (keeps chips in place) */
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+  body { display: flex; flex-direction: column; height: 100dvh; }
+
+  /* Starter question chips — 2x2 grid, clear of the iPhone status bar */
+  #chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0;
+           padding: calc(12px + env(safe-area-inset-top)) 12px 8px; background: var(--bg);
+           max-width: 720px; width: 100%; margin: 0 auto; }
+  #chips button { border: 1px solid var(--accent); color: var(--brand); background: var(--accent-bg);
+                  border-radius: var(--radius); padding: 9px 8px; font-size: 14px; line-height: 1.25;
+                  white-space: normal; cursor: pointer; font-family: inherit; }
+  #chips button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  /* Chat fills the remaining screen and scrolls on its own */
+  #webchat { flex: 1; min-height: 0; position: relative; }
+  #webchat > div { height: 100%; }
+  #webchat .webchat__bubble__content { font-size: 16px; line-height: 1.45;
+                                       border-radius: var(--radius) !important; overflow: hidden; }
+
+  /* ===== SEND BOX FIX — visible textarea AND its hidden measuring copy must match ===== */
+  #webchat input,
+  #webchat textarea,
+  #webchat .webchat__auto-resize-textarea__textarea,
+  #webchat .webchat__auto-resize-textarea__doppelganger {
+    font-size: 16px !important;      /* stops iPhone zoom */
+    line-height: 1.4 !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-family: inherit !important;
+  }
+  #webchat .webchat__auto-resize-textarea { min-height: 34px; }
+  #webchat .webchat__send-box__main { min-height: 52px; align-items: center; }
+  #webchat .webchat__send-box-text-box { padding-top: 4px; padding-bottom: 4px; }
+  /* ===== END FIX ===== */
+
+  /* Disclaimer (keep — Apple required this) */
+  .disclaimer { flex-shrink: 0; font-size: 11px; color: var(--muted); text-align: center; background: var(--surface);
+                border-top: 1px solid var(--border);
+                padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); }
+  .chat-error { padding: 24px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+  <div id="chips" aria-label="Suggested questions">
+    <button data-q="How can I lower my cancer risk?">Lower my cancer risk</button>
+    <button data-q="Which cancer screenings should I ask my doctor about?">Screenings to ask about</button>
+    <button data-q="How do alcohol and tobacco affect cancer risk?">Alcohol, tobacco &amp; cancer</button>
+    <button data-q="Which foods and habits help reduce cancer risk?">Foods &amp; habits that help</button>
+  </div>
+
+  <div id="webchat" role="main"></div>
+
+  <div class="disclaimer">
+    Eddie provides educational information only — not medical advice. Always consult your physician for personalized care.
+  </div>
+
+<script>
+(async function () {
+  // All colors are read from the :root block above — no colors to edit down here.
+  const css = getComputedStyle(document.documentElement);
+  const v = name => css.getPropertyValue(name).trim();
+  const BRAND = v('--brand'), BG = v('--bg'), SURFACE = v('--surface'),
+        TEXT = v('--text'), BORDER = v('--border');
+  const RADIUS = parseInt(v('--radius'), 10) || 14;
+  const chips = document.getElementById('chips');
+
+  try {
+    const tokenEndpointURL = new URL('https://default55392b7f41f9468a8aaec256bc68af.e5.environment.api.powerplatform.com/powervirtualagents/botsbyschema/Default_eddie/directline/token?api-version=2022-03-01-preview');
+    const locale = document.documentElement.lang || 'en';
+    const apiVersion = tokenEndpointURL.searchParams.get('api-version');
+
+    const [directLineURL, token] = await Promise.all([
+      fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+        .then(r => r.json()).then(({ channelUrlsById: { directline } }) => directline),
+      fetch(tokenEndpointURL).then(r => r.json()).then(({ token }) => token)
+    ]);
+
+    const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
+
+    // Eddie's greeting
+    const sub = directLine.connectionStatus$.subscribe({
+      next(status) {
+        if (status === 2) {
+          directLine.postActivity({ localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            locale, name: 'startConversation', type: 'event' }).subscribe();
+          sub.unsubscribe();
+        }
+      }
+    });
+
+    // Hide chips once the user sends any message
+    const store = WebChat.createStore({}, () => next => action => {
+      if (action.type === 'WEB_CHAT/SEND_MESSAGE') chips.style.display = 'none';
+      return next(action);
+    });
+
+    // Tapping a chip sends its full question
+    chips.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        store.dispatch({ type: 'WEB_CHAT/SEND_MESSAGE', payload: { text: btn.dataset.q } });
+      });
+    });
+
+    const styleOptions = {
+      bubbleMaxWidth: 1400,               // full-width replies
+      hideUploadButton: true,
+      backgroundColor: BG,
+
+      // Rounded corners on all bubbles, no "tail" corners
+      bubbleBorderRadius: RADIUS,
+      bubbleFromUserBorderRadius: RADIUS,
+      bubbleNubSize: 0,
+      bubbleFromUserNubSize: 0,
+
+      // EDDIE's replies
+      bubbleBackground: SURFACE,
+      bubbleTextColor: TEXT,
+      bubbleBorderColor: BORDER,
+
+      // Your messages
+      bubbleFromUserBackground: BRAND,
+      bubbleFromUserTextColor: '#ffffff',
+      bubbleFromUserBorderColor: BRAND,
+
+      // Larger, easier-to-tap typing bar
+      sendBoxHeight: 52,
+      sendBoxTextWrap: true,              // long questions wrap instead of scrolling sideways
+      sendBoxMaxHeight: 140,              // grows up to ~5 lines, then scrolls
+      sendBoxBackground: SURFACE,
+      sendBoxTextColor: TEXT,
+      sendBoxBorderTop: `solid 1px ${BORDER}`,
+      sendBoxButtonColor: BRAND,
+      suggestedActionBorderColor: BRAND,
+      suggestedActionTextColor: BRAND
+    };
+
+    WebChat.renderWebChat({ directLine, locale, store, styleOptions }, document.getElementById('webchat'));
+  } catch (e) {
+    document.getElementById('webchat').innerHTML =
+      '<div class="chat-error">EDDIE is temporarily unavailable. Please try again shortly.</div>';
+  }
+})();
+</script>
+</body>
+</html>
