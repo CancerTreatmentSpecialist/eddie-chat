@@ -203,6 +203,17 @@ body{
     box-shadow:0 2px 8px rgba(22,50,79,.06);
 }
 
+/* Hide chat avatars (the "E" circle) and the space they reserve */
+#webchat .webchat__stacked-layout__avatar-gutter,
+#webchat .webchat__initialsAvatar,
+#webchat .webchat__imageAvatar,
+#webchat .webchat__defaultAvatar,
+#webchat .webchat__avatar{
+    display:none !important;
+    width:0 !important;
+    min-width:0 !important;
+}
+
 /* Restore numbered/bulleted lists and spacing inside chat bubbles */
 #webchat ol,
 #webchat ul{
@@ -416,6 +427,7 @@ body{
             bubbleBorderWidth: 0,
             bubbleNubSize: 0,
             bubbleMaxWidth: 760,
+            avatarSize: 0,
 
             // User's messages — strong blue, white text, rounded
             bubbleFromUserBackground: '#4A97FF',
