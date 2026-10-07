@@ -203,6 +203,39 @@ body{
     box-shadow:0 2px 8px rgba(22,50,79,.06);
 }
 
+/* Restore numbered/bulleted lists and spacing inside chat bubbles */
+#webchat .webchat__bubble__content ol,
+#webchat .webchat__bubble__content ul{
+    padding-left:26px;
+    margin:6px 0;
+}
+
+#webchat .webchat__bubble__content ol{
+    list-style:decimal;
+}
+
+#webchat .webchat__bubble__content ul{
+    list-style:disc;
+}
+
+#webchat .webchat__bubble__content li{
+    margin:3px 0;
+    padding-left:2px;
+}
+
+#webchat .webchat__bubble__content p{
+    margin:6px 0;
+    line-height:1.5;
+}
+
+#webchat .webchat__bubble__content p:first-child{
+    margin-top:0;
+}
+
+#webchat .webchat__bubble__content p:last-child{
+    margin-bottom:0;
+}
+
 #webchat .webchat__send-box__main{
     border-radius:0 0 24px 24px;
 }
