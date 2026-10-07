@@ -70,11 +70,7 @@ body{
 }
 
 .hero-card{
-    background:linear-gradient(
-    135deg,
-    #68B5FF,
-    #94CCFF
-    );
+    background:linear-gradient(135deg, #68B5FF, #94CCFF);
     color:white;
     border-radius:20px;
     padding:24px;
@@ -117,10 +113,12 @@ body{
 .main{
     display:flex;
     flex-direction:column;
+    min-height:0;
 }
 
 .topbar{
     height:88px;
+    flex-shrink:0;
     background:white;
     border-bottom:1px solid var(--border);
     display:flex;
@@ -149,6 +147,7 @@ body{
 
 .chat-container{
     flex:1;
+    min-height:0;
     padding:24px;
 }
 
@@ -158,24 +157,83 @@ body{
     border-radius:24px;
     overflow:hidden;
     box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
 }
 
-iframe{
-    width:100%;
-    height:100%;
-    border:none;
+/* STARTER QUESTION CHIPS (color-coded) */
+
+.starter-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    padding:16px 20px 12px;
+    border-bottom:1px solid var(--border);
+    background:#FBFDFF;
+}
+
+.chip{
+    border:1.5px solid;
+    border-radius:999px;
+    padding:9px 16px;
+    font-size:.92rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .15s, box-shadow .15s;
+    background:white;
+}
+
+.chip:hover{
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(22,50,79,.12);
+}
+
+.chip-blue  { color:#2673D8; border-color:#68B5FF; background:#EAF5FF; }
+.chip-teal  { color:#0F766E; border-color:#5EEAD4; background:#E6FAF7; }
+.chip-violet{ color:#6D28D9; border-color:#C4B5FD; background:#F3EEFF; }
+.chip-amber { color:#B45309; border-color:#FCD34D; background:#FFF8E6; }
+
+#webchat{
+    flex:1;
+    min-height:0;
+}
+
+/* Extra rounding/polish inside Web Chat */
+#webchat .webchat__bubble__content{
+    box-shadow:0 2px 8px rgba(22,50,79,.06);
+}
+
+#webchat .webchat__send-box__main{
+    border-radius:0 0 24px 24px;
+}
+
+.chat-error{
+    padding:24px;
+    color:#B91C1C;
+    line-height:1.6;
 }
 
 @media (max-width:1024px){
 
-.container{
-    grid-template-columns:1fr;
-}
+    .container{
+        grid-template-columns:1fr;
+    }
 
-.sidebar{
-    display:none;
-}
+    .sidebar{
+        display:none;
+    }
 
+    .chat-container{
+        padding:12px;
+    }
+
+    .topbar{
+        padding:0 16px;
+    }
+
+    .title-area h2{
+        font-size:1.4rem;
+    }
 }
 
 </style>
@@ -191,50 +249,36 @@ iframe{
     <div class="sidebar">
 
         <div class="logo">
-
             <h1>
                 Eddie Clinical Trials
                 <span>Pro</span>
             </h1>
-
             <p>
                 AI-powered trial eligibility screening for
                 investigators, coordinators, sponsors,
                 and academic research programs.
             </p>
-
         </div>
 
         <div class="hero-card">
-
-            <h2>
-                AI-Powered Trial Eligibility Screening
-            </h2>
-
+            <h2>AI-Powered Trial Eligibility Screening</h2>
             <p>
                 Identify potential eligibility criteria,
                 review protocol requirements,
                 evaluate biomarkers,
                 and streamline research workflows.
             </p>
-
         </div>
 
         <div class="study-card">
-
             <h3>Active Programs</h3>
-
             <ul>
                 <li>CURRENTLY RECRUITING SITES</li>
-                
             </ul>
-
         </div>
 
         <div class="study-card">
-
             <h3>Supported Workflows</h3>
-
             <ul>
                 <li>Eligibility Screening</li>
                 <li>Protocol Review</li>
@@ -242,20 +286,16 @@ iframe{
                 <li>Biomarker Assessment</li>
                 <li>Research Team Support</li>
             </ul>
-
         </div>
 
         <div class="study-card">
-
             <h3>Eddie Platform Suite</h3>
-
             <ul>
                 <li>Cancerless</li>
                 <li>Ask Eddie</li>
                 <li>Eddie Clinical Trials Navigator</li>
                 <li>Eddie Clinical Trials Pro</li>
             </ul>
-
         </div>
 
     </div>
@@ -265,40 +305,151 @@ iframe{
     <div class="main">
 
         <div class="topbar">
-
             <div class="title-area">
-
                 <h2>Eddie Clinical Trials Pro</h2>
-
-                <p>
-                    AI-Powered Eligibility Screening
-                </p>
-
+                <p>AI-Powered Eligibility Screening</p>
             </div>
-
-            <div class="badge">
-                Institutional Edition
-            </div>
-
+            <div class="badge">Institutional Edition</div>
         </div>
 
         <div class="chat-container">
+            <div class="chat-window">
 
-           <div class="chat-window">
+                <!-- Color-coded starter questions -->
+                <div class="starter-chips">
+                    <button class="chip chip-blue"   data-text="Screen Patient">🩺 Screen Patient</button>
+                    <button class="chip chip-teal"   data-text="Eligibility Review">✅ Eligibility Review</button>
+                    <button class="chip chip-violet" data-text="Compare Studies">⚖️ Compare Studies</button>
+                    <button class="chip chip-amber"  data-text="Protocol Search">🔎 Protocol Search</button>
+                </div>
 
-<iframe
-src="https://copilotstudio.microsoft.com/environments/Default-55392b7f-41f9-468a-8aae-c256bc68afe5/bots/auto_agent_ZQATx/webchat?__version__=2">
-</iframe>
-
-</div>
+                <!-- Chat (paperclip upload + microphone enabled) -->
+                <div id="webchat" role="main"></div>
 
             </div>
-
         </div>
 
     </div>
 
 </div>
+
+<script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+
+<script>
+(async function () {
+
+    // ===== PASTE YOUR TOKEN ENDPOINT BETWEEN THE QUOTES =====
+    // Copilot Studio > Eddie - Clinical Trials Pro > Channels > Mobile app > Token Endpoint
+    const TOKEN_ENDPOINT = 'https://default55392b7f41f9468a8aaec256bc68af.e5.environment.api.powerplatform.com/powervirtualagents/botsbyschema/auto_agent_ZQATx/directline/token?api-version=2022-03-01-preview';
+    // ========================================================
+
+    const chatEl = document.getElementById('webchat');
+
+    try {
+        const tokenEndpointURL = new URL(TOKEN_ENDPOINT);
+        const apiVersion = tokenEndpointURL.searchParams.get('api-version');
+
+        const [directLineURL, token] = await Promise.all([
+            fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+                .then(r => r.json())
+                .then(({ channelUrlsById: { directline } }) => directline),
+            fetch(tokenEndpointURL)
+                .then(r => r.json())
+                .then(({ token }) => token)
+        ]);
+
+        const directLine = WebChat.createDirectLine({
+            domain: new URL('v3/directline', directLineURL),
+            token
+        });
+
+        const store = WebChat.createStore();
+
+        const styleOptions = {
+            // Overall
+            accent: '#4A97FF',
+            backgroundColor: '#FFFFFF',
+            primaryFont: "'Segoe UI', Arial, sans-serif",
+            rootHeight: '100%',
+            rootWidth: '100%',
+            timestampColor: '#64748B',
+
+            // Eddie's replies — soft blue, rounded
+            bubbleBackground: '#EAF5FF',
+            bubbleTextColor: '#16324F',
+            bubbleBorderRadius: 18,
+            bubbleBorderWidth: 0,
+            bubbleNubSize: 0,
+            bubbleMaxWidth: 760,
+
+            // User's messages — strong blue, white text, rounded
+            bubbleFromUserBackground: '#4A97FF',
+            bubbleFromUserTextColor: '#FFFFFF',
+            bubbleFromUserBorderRadius: 18,
+            bubbleFromUserBorderWidth: 0,
+            bubbleFromUserNubSize: 0,
+
+            // Avatars
+            botAvatarInitials: 'E',
+            botAvatarBackgroundColor: '#4A97FF',
+            userAvatarInitials: 'You',
+            userAvatarBackgroundColor: '#16324F',
+
+            // Buttons Eddie suggests — rounded pills
+            suggestedActionBorderRadius: 999,
+            suggestedActionBackgroundColor: '#FFFFFF',
+            suggestedActionBorderColor: '#68B5FF',
+            suggestedActionTextColor: '#2673D8',
+
+            // Send box — paperclip ON
+            hideUploadButton: false,
+            sendBoxBackground: '#F9FCFF',
+            sendBoxBorderTop: 'solid 1px #D9EAFB',
+            sendBoxHeight: 56,
+            sendBoxButtonColor: '#4A97FF',
+            sendBoxButtonColorOnHover: '#2673D8',
+            sendBoxPlaceholderColor: '#64748B'
+        };
+
+        // Microphone: uses the browser's built-in speech (Chrome, Edge, Safari)
+        const webSpeechPonyfillFactory = WebChat.createBrowserWebSpeechPonyfillFactory();
+
+        WebChat.renderWebChat(
+            {
+                directLine,
+                store,
+                styleOptions,
+                webSpeechPonyfillFactory,
+                locale: 'en-US'
+            },
+            chatEl
+        );
+
+        // Show Eddie's welcome message
+        directLine.postActivity({
+            from: { id: 'user' },
+            name: 'startConversation',
+            type: 'event'
+        }).subscribe();
+
+        // Starter chips send their question
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                store.dispatch({
+                    type: 'WEB_CHAT/SEND_MESSAGE',
+                    payload: { text: chip.dataset.text }
+                });
+            });
+        });
+
+    } catch (err) {
+        console.error(err);
+        chatEl.innerHTML =
+            '<div class="chat-error">Eddie is temporarily unavailable. Please refresh the page in a moment.</div>';
+    }
+
+})();
+</script>
 
 </body>
 
