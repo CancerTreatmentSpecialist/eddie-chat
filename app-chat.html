@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -44,6 +44,11 @@
   #webchat .webchat__send-box-text-box { padding-top: 4px; padding-bottom: 4px; }
   /* ===== END FIX ===== */
 
+  /* Microphone button — brand color, easy to tap */
+  #webchat .webchat__microphone-button { min-width: 44px; }
+  #webchat .webchat__microphone-button svg { fill: var(--brand); }
+  #webchat .webchat__microphone-button--dictating svg { fill: #dc2626; } /* red while listening */
+
   /* Disclaimer (keep — Apple required this) */
   .disclaimer { flex-shrink: 0; font-size: 11px; color: var(--muted); text-align: center; background: #fff;
                 border-top: 1px solid var(--border);
@@ -73,7 +78,7 @@
 
   try {
     const tokenEndpointURL = new URL('https://default55392b7f41f9468a8aaec256bc68af.e5.environment.api.powerplatform.com/powervirtualagents/botsbyschema/Default_eddie/directline/token?api-version=2022-03-01-preview');
-    const locale = document.documentElement.lang || 'en';
+    const locale = 'en-US'; // full locale needed for voice recognition
     const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
     const [directLineURL, token] = await Promise.all([
@@ -129,10 +134,20 @@
       sendBoxMaxHeight: 140,              // grows up to ~5 lines, then scrolls
       sendBoxBackground: '#ffffff',
       sendBoxBorderTop: 'solid 1px #e5e7eb',
-      sendBoxButtonColor: BRAND
+      sendBoxButtonColor: BRAND,
+      sendBoxButtonColorOnHover: BRAND
     };
 
-    WebChat.renderWebChat({ directLine, locale, store, styleOptions }, document.getElementById('webchat'));
+    // Microphone: browser's built-in speech (Chrome, Edge, Safari). Only added if the browser supports it.
+    const speechSupported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    const webSpeechPonyfillFactory = speechSupported
+      ? WebChat.createBrowserWebSpeechPonyfillFactory()
+      : undefined;
+
+    WebChat.renderWebChat(
+      { directLine, locale, store, styleOptions, webSpeechPonyfillFactory },
+      document.getElementById('webchat')
+    );
   } catch (e) {
     document.getElementById('webchat').innerHTML =
       '<div class="chat-error">EDDIE is temporarily unavailable. Please try again shortly.</div>';
