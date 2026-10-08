@@ -118,6 +118,8 @@ main{padding:0 16px;margin-top:-44px;position:relative}
 .state p{font-size:13.5px;color:var(--ink-2);margin-top:6px}
 .skel{height:14px;border-radius:7px;background:linear-gradient(90deg,#eef2f7 25%,#f7f9fc 50%,#eef2f7 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin:10px 0}
 @keyframes sh{to{background-position:-200% 0}}
+.go{margin-top:16px;border:0;font:inherit;font-weight:700;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--teal),var(--blue));padding:13px 26px;border-radius:14px;cursor:pointer;box-shadow:0 6px 16px rgba(0,87,168,.25)}
+.hint{display:none;margin-top:12px!important;font-size:13px;background:var(--bg);border-radius:12px;padding:10px}
 footer{font-size:11px;color:var(--muted);text-align:center;padding:6px 24px 0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -406,12 +408,22 @@ document.querySelectorAll('.seg button').forEach(b=>{
   b.addEventListener('click', ()=>{ state.view = b.dataset.view; render(); window.scrollTo({top:0,behavior:'smooth'}); });
 });
 
-function stateCard(icon, title, body){
-  return `<div class="card state"><div class="big">${icon}</div><h2>${title}</h2><p>${body}</p></div>`;
+function stateCard(icon, title, body, action){
+  const btn = action ? `<button class="go" onclick="goToApp()">${action}</button>
+    <p class="hint" id="navHint">Tap the <b>←</b> back arrow at the top of the screen, then sign in.</p>` : '';
+  return `<div class="card state"><div class="big">${icon}</div><h2>${title}</h2><p>${body}</p>${btn}</div>`;
+}
+// Leave this page and return to the app's sign-in flow.
+// Web (page runs inside an iframe): send the whole browser tab to the app; it opens Sign In if signed out.
+// Native app (no iframe): a WebView can't steer the app, so show how to go back.
+const APP_URL = 'https://getcancerless.org/';
+function goToApp(){
+  try{ if(window.top !== window.self){ window.top.location.href = APP_URL; return; } }catch(e){}
+  const h = document.getElementById('navHint'); if(h) h.style.display = 'block';
 }
 function errorCard(err, collection){
   const c = err && err.code;
-  if(c === 'UNAUTHENTICATED') return stateCard('🔑','Please reopen this page','Your sign-in expired. Leave this screen and open it again from the app.');
+  if(c === 'UNAUTHENTICATED') return stateCard('🔑','Please sign in again','Your sign-in expired for your security.','Go to Sign In');
   if(c === 'FAILED_PRECONDITION') return stateCard('🛠️','Almost ready','Your data index is still being built. Please check back in a few minutes.');
   if(c === 'PERMISSION_DENIED') return stateCard('🔐','Access blocked','Your account could not read its '+esc(collection)+'. Please sign out and back in.');
   return stateCard('⚠️','Could not load your progress','Please check your connection and try again. ('+esc(c||'error')+')');
@@ -650,7 +662,7 @@ function render(){
   document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.view===state.view)));
   charts.length = 0;
   if(!uid){
-    app.innerHTML = stateCard('🔒','Sign in to see your progress','Open My Progress from inside the CancerLess app while signed in.');
+    app.innerHTML = stateCard('🔒','Sign in to see your progress','Your check-ins sync to your account. Sign in and your charts appear here.','Go to Sign In');
     return;
   }
   if(state.daily === null && !state.dailyErr){ return; }
