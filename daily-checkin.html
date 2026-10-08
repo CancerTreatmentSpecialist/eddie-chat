@@ -6,9 +6,8 @@
 
 <title>CancerLess Daily Prevention Check-In</title>
 
-<!-- Firebase SDKs (compat, works without a build step) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- Saves go through the Firestore REST API using the signed-in user's
+     Firebase ID token, so owner-only security rules are enforced. -->
 
 <style>
 *{
@@ -418,23 +417,64 @@ window.onerror=function(msg){
 console.log(msg);
 };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD9QAG0NDfjQ05-WhYJdmcaS8GazK3M8rY",
-  authDomain: "cancer-less-rka8v5.firebaseapp.com",
-  projectId: "cancer-less-rka8v5",
-  storageBucket: "cancer-less-rka8v5.firebasestorage.app",
-  messagingSenderId: "72804578972",
-  appId: "1:72804578972:web:18629d753ec85a1e155f59"
-};
+// ---------- FIREBASE (REST, authenticated as the signed-in user) ----------
+const FIREBASE_API_KEY = "AIzaSyD9QAG0NDfjQ05-WhYJdmcaS8GazK3M8rY";
+const FIREBASE_PROJECT = "cancer-less-rka8v5";
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// FlutterFlow WebView URL:  daily-checkin.html?v=N#t=<Authenticated User JWT Token>
+// The token rides in the #fragment, so it is never sent to the web server.
+const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+const queryParams = new URLSearchParams(window.location.search);
+const idToken = (hashParams.get('t') || queryParams.get('t') || '').trim();
 
-// ---------- GET LOGGED-IN USER ----------
-// The WebView URL passes ?uid=THE_USERS_UID from FlutterFlow.
-// No banner and no disabled button: the uid is only checked when Save is tapped.
-const urlParams = new URLSearchParams(window.location.search);
-const currentUserId = (urlParams.get('uid') || '').trim();
+function uidFromToken(tok){
+  try{
+    const part = tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const json = JSON.parse(decodeURIComponent(escape(atob(part + '==='.slice((part.length+3)%4)))));
+    return json.user_id || json.sub || '';
+  }catch(e){ return ''; }
+}
+const currentUserId = idToken ? uidFromToken(idToken) : '';
+
+function newDocId(){
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const bytes=new Uint8Array(20);
+  crypto.getRandomValues(bytes);
+  let id='';
+  for(const b of bytes){ id+=chars[b%chars.length]; }
+  return id;
+}
+
+function saveDailyLog(data){
+  const base='projects/'+FIREBASE_PROJECT+'/databases/(default)/documents';
+  const fields={
+    userId:{stringValue:data.userId},
+    exercise:{integerValue:String(data.exercise)},
+    nutrition:{integerValue:String(data.nutrition)},
+    sleep:{integerValue:String(data.sleep)},
+    tobaccoUsed:{booleanValue:data.tobaccoUsed},
+    alcoholUsed:{booleanValue:data.alcoholUsed},
+    screeningStatus:{stringValue:data.screeningStatus},
+    reflection:{stringValue:data.reflection},
+    wellnessScore:{integerValue:String(data.wellnessScore)}
+  };
+  const body={writes:[{
+    update:{name:base+'/daily_logs/'+newDocId(), fields:fields},
+    currentDocument:{exists:false},
+    updateTransforms:[{fieldPath:'createdTime', setToServerValue:'REQUEST_TIME'}]
+  }]};
+  return fetch('https://firestore.googleapis.com/v1/'+base+':commit?key='+FIREBASE_API_KEY,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+    body:JSON.stringify(body)
+  }).then(function(r){
+    if(r.ok) return r.json();
+    return r.json().catch(function(){return {};}).then(function(j){
+      const status=(j.error && j.error.status) || ('HTTP '+r.status);
+      const err=new Error(status); err.code=status; throw err;
+    });
+  });
+}
 
 let tobaccoUsed=false;
 let alcoholUsed=false;
@@ -524,11 +564,10 @@ tobaccoUsed: tobaccoUsed,
 alcoholUsed: alcoholUsed,
 screeningStatus: screeningStatus,
 reflection: reflection,
-wellnessScore: s.score,
-createdTime: firebase.firestore.FieldValue.serverTimestamp()
+wellnessScore: s.score
 };
 
-db.collection('daily_logs').add(checkinData)
+saveDailyLog(checkinData)
 .then(function(){
 saveBtn.disabled=false;
 saveBtn.textContent="Save Today's Check-In";
@@ -542,7 +581,9 @@ saveBtn.disabled=false;
 saveBtn.textContent="Save Today's Check-In";
 showResult('error',
 'Check-in not saved. Tap Save to try again.',
-'Error: '+((error && error.code) ? error.code : 'unknown'));
+(error && error.code==='UNAUTHENTICATED')
+  ? 'Your sign-in expired. Close Daily Check-In and open it again.'
+  : 'Error: '+((error && error.code) ? error.code : 'unknown'));
 });
 }
 
