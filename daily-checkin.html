@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 
 <title>CancerLess Daily Prevention Check-In</title>
 
@@ -225,6 +225,11 @@ textarea{
     color:#6b7280;
     font-size:12px;
     padding:20px;
+}
+/* Extra room at the bottom so the Save button and result message can scroll
+   fully clear of the app's bottom nav bar and the iPhone home indicator. */
+body{
+    padding-bottom:calc(160px + env(safe-area-inset-bottom));
 }
 .progress-link{display:block;margin-top:12px;padding:12px 16px;border-radius:14px;
 background:linear-gradient(135deg,#20c6c9,#0057a8);color:#fff;font-weight:700;text-decoration:none;text-align:center}
