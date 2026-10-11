@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>CancerLess · Daily Check-In</title>
+<!--
+  CancerLess Daily Check-In v2 — real units measured against national guidelines.
+  FlutterFlow WebView URL (Combine Text):
+    https://cancertreatmentspecialist.github.io/eddie-chat/daily-checkin-v2.html?v=1#t=  +  Authenticated User → Id token (JWT token)
+  Saves to Firestore `daily_logs` as the signed-in user (owner-only rules apply).
+  Writes the new fields (activityMinutes, sleepHours, fruitCups, vegCups, alcoholDrinks)
+  AND the original 1–5 fields (exercise, nutrition, sleep, tobaccoUsed, alcoholUsed, wellnessScore),
+  so the current My Progress page keeps working before and after the switch.
+-->
+<style>
+:root{
+  --bg:#f4f7fb; --card:#fff; --ink:#1f2937; --ink-2:#4b5563; --muted:#6b7280; --line:#e5eaf1; --grid:#edf1f6;
+  --teal:#20c6c9; --teal-ink:#0e8f94; --blue:#0057a8;
+  --good:#16a34a; --good-soft:#e8f7ee; --warn:#b45309; --warn-soft:#fff4e5;
+  --shadow:0 8px 24px rgba(16,42,84,.07), 0 1px 2px rgba(16,42,84,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:24px}
+.wrap{max-width:560px;margin:0 auto}
+.hero{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;padding:26px 20px 66px;border-radius:0 0 30px 30px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.hero h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.hero p{font-size:14px;opacity:.92;margin-top:4px}
+main{padding:0 16px;margin-top:-46px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
+.score{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.score .lab{font-size:13px;color:var(--muted)}
+.score .num{font-size:42px;font-weight:800;color:var(--blue);letter-spacing:-.03em;line-height:1}
+.score .num small{font-size:15px;color:var(--muted);font-weight:600;margin-left:3px}
+.met{background:var(--good-soft);color:var(--good);font-weight:800;font-size:13px;border-radius:20px;padding:8px 12px;text-align:center;white-space:nowrap}
+.q-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.q-head h2{font-size:16.5px;font-weight:750}
+.q-head .sub{font-size:13px;color:var(--muted);margin-top:2px}
+.info{flex-shrink:0;border:0;background:var(--bg);color:var(--blue);font:inherit;font-weight:800;font-size:13px;width:30px;height:30px;border-radius:50%;cursor:pointer}
+.stepper{display:flex;align-items:center;justify-content:center;gap:14px;margin:14px 0 8px}
+.stepper button{width:46px;height:46px;border-radius:14px;border:0;background:var(--bg);color:var(--blue);font-size:24px;font-weight:700;cursor:pointer}
+.stepper button:active{transform:scale(.94)}
+.stepper .val{min-width:120px;text-align:center}
+.stepper .val b{font-size:34px;font-weight:800;letter-spacing:-.02em}
+.stepper .val span{display:block;font-size:12.5px;color:var(--muted);margin-top:-2px}
+.quick{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.quick button{border:1.5px solid var(--line);background:#fff;color:var(--ink-2);font:inherit;font-size:13px;font-weight:650;border-radius:20px;padding:6px 12px;cursor:pointer}
+.quick button.on{border-color:var(--teal);background:#e9fafa;color:var(--teal-ink)}
+.gauge{position:relative;height:12px;border-radius:7px;background:var(--grid);margin:6px 0 4px}
+.gauge .zone{position:absolute;top:0;bottom:0;background:#bfe9cf;border-radius:7px}
+.gauge .mark{position:absolute;top:-5px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#fff;border:4px solid var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.2);transition:left .35s cubic-bezier(.2,.8,.2,1)}
+.g-scale{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.status{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px;font-weight:700}
+.status i{font-style:normal;font-size:16px}
+.status.good{color:var(--good)} .status.warn{color:var(--warn)}
+.status .tgt{margin-left:auto;font-weight:600;color:var(--muted);font-size:12.5px;text-align:right}
+.src{display:none;margin-top:12px;background:var(--bg);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--ink-2)}
+.src.open{display:block}
+.src a{color:var(--blue);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:2px solid var(--teal);background:#fff;color:var(--teal-ink);font:inherit;font-weight:700;font-size:14px;border-radius:24px;padding:9px 16px;cursor:pointer}
+.chip.on{background:var(--teal);color:#fff}
+textarea{width:100%;min-height:84px;border:1px solid #d1d5db;border-radius:14px;padding:12px;font:inherit;font-size:15px;resize:none;margin-top:10px}
+.save{display:block;width:100%;border:0;border-radius:18px;padding:17px;color:#fff;font:inherit;font-size:17px;font-weight:800;background:linear-gradient(135deg,var(--teal),var(--blue));cursor:pointer;box-shadow:0 8px 20px rgba(0,87,168,.25)}
+.save:disabled{opacity:.6;cursor:wait}
+.result{display:none;border-radius:18px;padding:18px;text-align:center;margin-top:14px}
+.result.success{display:block;background:#ecfdf5;border:1px solid #86efac}
+.result.error{display:block;background:#fee2e2;border:1px solid #fca5a5}
+.result .detail{display:block;margin-top:6px;font-size:12.5px;color:var(--muted)}
+.progress-link{display:block;margin-top:12px;padding:12px 16px;border-radius:14px;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;font-weight:800;text-decoration:none}
+.note{font-size:11.5px;color:var(--muted);text-align:center;padding:14px 18px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">CancerLess</div>
+    <h1>Daily Check-In</h1>
+    <p>See how today stacks up against the guidelines for cancer prevention.</p>
+  </header>
+  <main>
+    <div class="card">
+      <div class="score">
+        <div><div class="lab">Today's Wellness Score</div><div class="num"><span id="score">0</span><small>/ 23</small></div></div>
+        <div class="met" id="metCount">0 of 4 goals met</div>
+      </div>
+    </div>
+
+    <div id="habits"></div>
+
+    <div class="card">
+      <div class="q-head"><div><h2>🚭 Tobacco</h2><div class="sub">Did you use any tobacco or vape today?</div></div></div>
+      <div class="chips" data-group="tobacco">
+        <button class="chip on" data-v="no">No</button><button class="chip" data-v="yes">Yes</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="q-head"><div><h2>🩺 Cancer screenings</h2><div class="sub">What best describes your screening status?</div></div></div>
+      <div class="chips" data-group="screening">
+        <button class="chip on" data-v="up_to_date">Up to date</button>
+        <button class="chip" data-v="due_soon">Due soon</button>
+        <button class="chip" data-v="overdue">Overdue</button>
+        <button class="chip" data-v="not_sure">Not sure</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="q-head"><div><h2>💡 Goal for tomorrow</h2><div class="sub">Optional</div></div></div>
+      <textarea id="reflection" placeholder="Walk 30 minutes, add a vegetable to lunch, schedule a screening..."></textarea>
+    </div>
+
+    <button class="save" id="saveBtn">Save Today's Check-In</button>
+    <div class="result" id="result" role="status" aria-live="polite"></div>
+    <p class="note">Targets are general guidelines for adults. Talk with your doctor about what's right for you. Educational purposes only; not a substitute for professional medical advice.</p>
+  </main>
+</div>
+
+<script>
+// ===================== AUTH / FIRESTORE =====================
+const FIREBASE_API_KEY = "AIzaSyD9QAG0NDfjQ05-WhYJdmcaS8GazK3M8rY";
+const FIREBASE_PROJECT = "cancer-less-rka8v5";
+const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+const queryParams = new URLSearchParams(location.search);
+const idToken = (hashParams.get('t') || queryParams.get('t') || '').trim();
+function uidFromToken(tok){
+  try{
+    const part = tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const json = JSON.parse(decodeURIComponent(escape(atob(part + '==='.slice((part.length+3)%4)))));
+    return json.user_id || json.sub || '';
+  }catch(e){ return ''; }
+}
+const currentUserId = idToken ? uidFromToken(idToken) : '';
+function newDocId(){
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const bytes=new Uint8Array(20); crypto.getRandomValues(bytes);
+  let id=''; for(const b of bytes){ id+=chars[b%chars.length]; } return id;
+}
+const fsInt = n => ({integerValue:String(Math.round(n))});
+const fsDbl = n => ({doubleValue:Number(n)});
+const fsStr = s => ({stringValue:String(s)});
+const fsBool = b => ({booleanValue:!!b});
+function createDoc(collection, fields, timestampFields){
+  const base='projects/'+FIREBASE_PROJECT+'/databases/(default)/documents';
+  const body={writes:[{
+    update:{name:base+'/'+collection+'/'+newDocId(), fields:fields},
+    currentDocument:{exists:false},
+    updateTransforms:timestampFields.map(f=>({fieldPath:f, setToServerValue:'REQUEST_TIME'}))
+  }]};
+  return fetch('https://firestore.googleapis.com/v1/'+base+':commit?key='+FIREBASE_API_KEY,{
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken}, body:JSON.stringify(body)
+  }).then(r=>{
+    if(r.ok) return r.json();
+    return r.json().catch(()=>({})).then(j=>{ const s=(j.error&&j.error.status)||('HTTP '+r.status); const e=new Error(s); e.code=s; throw e; });
+  });
+}
+
+// ===================== TARGETS (general adult guidelines) =====================
+// Verify against current sources before publishing; links shown in-app.
+const SOURCES = {
+  activity:{label:'U.S. Physical Activity Guidelines (HHS)', url:'https://odphp.health.gov/our-work/nutrition-physical-activity/physical-activity-guidelines/current-guidelines'},
+  acs:{label:'American Cancer Society Guideline for Diet and Physical Activity', url:'https://www.cancer.org/cancer/risk-prevention/diet-physical-activity/acs-guidelines-nutrition-physical-activity-cancer-prevention/guidelines.html'},
+  sleep:{label:'CDC: About Sleep', url:'https://www.cdc.gov/sleep/about/index.html'},
+  dga:{label:'Dietary Guidelines for Americans', url:'https://www.dietaryguidelines.gov/'},
+};
+const HABITS = [
+  { key:'activityMinutes', emoji:'🏃', title:'Physical activity', ask:'Minutes of walking or other activity today',
+    unit:'minutes', step:5, min:0, max:240, start:0, quick:[0,15,30,45,60],
+    scale:[0,60], zone:[30,60], goal:v=>v>=30,
+    target:'Goal: 30+ min/day', note:'Adults should get 150–300 minutes of moderate activity (like brisk walking) each week, which is about 30 minutes on 5 days. More activity offers even more protection.',
+    src:['activity','acs'] },
+  { key:'sleepHours', emoji:'😴', title:'Sleep', ask:'Hours you slept last night',
+    unit:'hours', step:.5, min:0, max:14, start:7, quick:[5,6,7,8,9],
+    scale:[4,11], zone:[7,9], goal:v=>v>=7 && v<=9,
+    target:'Goal: 7–9 hours', note:'Most adults need 7 or more hours of sleep each night for good health.',
+    src:['sleep'] },
+  { key:'fruitCups', emoji:'🍎', title:'Fruit', ask:'Cups of fruit today',
+    unit:'cups', step:.5, min:0, max:8, start:0, quick:[0,.5,1,1.5,2],
+    scale:[0,3], zone:[1.5,3], goal:v=>v>=1.5,
+    target:'Goal: 1½–2 cups', note:'Adults need about 1½–2 cups of fruit a day. 1 cup ≈ a medium apple, a large banana, or a cup of berries. Whole fruit is better than juice.',
+    src:['dga','acs'] },
+  { key:'vegCups', emoji:'🥦', title:'Vegetables', ask:'Cups of vegetables today',
+    unit:'cups', step:.5, min:0, max:10, start:0, quick:[0,1,2,2.5,3],
+    scale:[0,4], zone:[2,4], goal:v=>v>=2,
+    target:'Goal: 2–3 cups', note:'Adults need about 2–3 cups of vegetables a day. 1 cup ≈ 2 cups of raw leafy greens, or a cup of cooked or chopped vegetables.',
+    src:['dga','acs'] },
+  { key:'alcoholDrinks', emoji:'🍷', title:'Alcohol', ask:'Alcoholic drinks today',
+    unit:'drinks', step:1, min:0, max:15, start:0, quick:[0,1,2,3],
+    scale:[0,4], zone:[0,.5], goal:v=>v===0, lowerIsBetter:true,
+    target:'Best: none', note:'For cancer prevention, it is best not to drink alcohol. If you do, limit it to 1 drink a day for women or 2 for men. 1 drink = 12 oz beer, 5 oz wine, or 1.5 oz liquor.',
+    src:['acs','dga'] },
+];
+const state = {}; HABITS.forEach(h=>state[h.key]=h.start);
+let tobaccoUsed = false, screeningStatus = 'up_to_date';
+
+// Map real units onto the original 1–5 scale (keeps My Progress v1 working).
+function activityScore(m){ return m>=45?5 : m>=30?4 : m>=20?3 : m>=10?2 : 1; }
+function sleepScore(h){ return (h>=7&&h<=9)?5 : (h>9)?4 : h>=6?3 : h>=5?2 : 1; }
+function nutritionScore(c){ return c>=4?5 : c>=3?4 : c>=2?3 : c>=1?2 : 1; }
+function calc(){
+  const exercise = activityScore(state.activityMinutes);
+  const sleep = sleepScore(state.sleepHours);
+  const nutrition = nutritionScore(state.fruitCups + state.vegCups);
+  let score = exercise + sleep + nutrition;
+  if(!tobaccoUsed) score += 3;
+  if(state.alcoholDrinks === 0) score += 3;
+  if(screeningStatus === 'up_to_date') score += 2;
+  const met = ['activityMinutes','sleepHours','fruitCups','vegCups'].filter(k=>HABITS.find(h=>h.key===k).goal(state[k])).length;
+  return {exercise, sleep, nutrition, score, met};
+}
+
+// ===================== UI =====================
+const fmt = v => (Math.round(v*10)/10).toString().replace(/\.0$/,'');
+const pct = (h,v) => Math.max(0, Math.min(100, (v - h.scale[0]) / (h.scale[1] - h.scale[0]) * 100));
+function srcHtml(h){
+  return h.note + '<br>' + h.src.map(k=>`Source: <a href="${SOURCES[k].url}" target="_blank" rel="noopener">${SOURCES[k].label}</a>`).join('<br>');
+}
+const box = document.getElementById('habits');
+box.innerHTML = HABITS.map(h=>`
+  <div class="card" data-k="${h.key}">
+    <div class="q-head"><div><h2>${h.emoji} ${h.title}</h2><div class="sub">${h.ask}</div></div>
+      <button class="info" aria-label="About this target" data-info>i</button></div>
+    <div class="stepper">
+      <button aria-label="Less" data-d="-1">−</button>
+      <div class="val"><b data-val>${fmt(h.start)}</b><span>${h.unit}</span></div>
+      <button aria-label="More" data-d="1">+</button>
+    </div>
+    <div class="quick">${h.quick.map(q=>`<button data-q="${q}">${fmt(q)}</button>`).join('')}</div>
+    <div class="gauge" aria-hidden="true"><div class="zone" style="left:${pct(h,h.zone[0])}%;width:${pct(h,h.zone[1])-pct(h,h.zone[0])}%"></div><div class="mark" data-mark></div></div>
+    <div class="g-scale"><span>${fmt(h.scale[0])}</span><span>${fmt(h.scale[1])}${h.key==='activityMinutes'?'+':''}</span></div>
+    <div class="status" data-status></div>
+    <div class="src" data-src>${srcHtml(h)}</div>
+  </div>`).join('');
+
+function paint(){
+  HABITS.forEach(h=>{
+    const el = box.querySelector(`[data-k="${h.key}"]`), v = state[h.key];
+    el.querySelector('[data-val]').textContent = fmt(v);
+    el.querySelector('[data-mark]').style.left = pct(h,v) + '%';
+    el.querySelectorAll('.quick button').forEach(b=>b.classList.toggle('on', +b.dataset.q === v));
+    const ok = h.goal(v);
+    let msg;
+    if(ok) msg = h.lowerIsBetter ? 'Goal met' : 'Goal met';
+    else if(h.lowerIsBetter) msg = v <= 1 ? 'Within the limit for some adults' : 'Above the recommended limit';
+    else if(h.key==='sleepHours' && v > 9) msg = 'More than recommended';
+    else msg = 'Getting there';
+    el.querySelector('[data-status]').className = 'status ' + (ok ? 'good' : 'warn');
+    el.querySelector('[data-status]').innerHTML = `<i>${ok?'✅':'•'}</i>${msg}<span class="tgt">${h.target}</span>`;
+  });
+  const c = calc();
+  document.getElementById('score').textContent = c.score;
+  document.getElementById('metCount').textContent = `${c.met} of 4 goals met`;
+}
+box.addEventListener('click', e=>{
+  const card = e.target.closest('.card'); if(!card) return;
+  const h = HABITS.find(x=>x.key===card.dataset.k);
+  if(e.target.dataset.d){ state[h.key] = Math.max(h.min, Math.min(h.max, Math.round((state[h.key] + h.step*(+e.target.dataset.d))*10)/10)); paint(); }
+  else if(e.target.dataset.q !== undefined){ state[h.key] = +e.target.dataset.q; paint(); }
+  else if(e.target.hasAttribute('data-info')){ card.querySelector('[data-src]').classList.toggle('open'); }
+});
+document.querySelectorAll('.chips').forEach(g=>g.addEventListener('click', e=>{
+  const b = e.target.closest('.chip'); if(!b) return;
+  g.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', x===b));
+  if(g.dataset.group==='tobacco') tobaccoUsed = b.dataset.v === 'yes';
+  else screeningStatus = b.dataset.v;
+  paint();
+}));
+
+function showResult(type, message, detail){
+  const r = document.getElementById('result');
+  r.className = 'result ' + type;
+  r.innerHTML = '<strong>'+message+'</strong>' + (detail ? '<span class="detail">'+detail+'</span>' : '');
+  r.scrollIntoView({behavior:'smooth', block:'center'});
+}
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  const btn = document.getElementById('saveBtn');
+  if(!currentUserId){ showResult('error','Sign in to the CancerLess app to save your check-in.','Open Daily Check-In from inside the app while signed in.'); return; }
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const c = calc();
+  const fields = {
+    userId: fsStr(currentUserId),
+    schemaVersion: fsInt(2),
+    // new real-unit fields
+    activityMinutes: fsInt(state.activityMinutes),
+    sleepHours: fsDbl(state.sleepHours),
+    fruitCups: fsDbl(state.fruitCups),
+    vegCups: fsDbl(state.vegCups),
+    alcoholDrinks: fsInt(state.alcoholDrinks),
+    // original fields (compatible with My Progress v1)
+    exercise: fsInt(c.exercise), nutrition: fsInt(c.nutrition), sleep: fsInt(c.sleep),
+    tobaccoUsed: fsBool(tobaccoUsed), alcoholUsed: fsBool(state.alcoholDrinks > 0),
+    screeningStatus: fsStr(screeningStatus),
+    reflection: fsStr(document.getElementById('reflection').value || ''),
+    wellnessScore: fsInt(c.score),
+  };
+  createDoc('daily_logs', fields, ['createdTime']).then(()=>{
+    btn.disabled = false; btn.textContent = "Save Today's Check-In";
+    showResult('success','✅ Check-in saved!', `${c.met} of 4 daily goals met · Wellness score ${c.score} / 23` +
+      `<a class="progress-link" href="cancerless-dashboard-v2.html?v=1#t=${encodeURIComponent(idToken)}">📊 See my progress →</a>`);
+  }).catch(err=>{
+    btn.disabled = false; btn.textContent = "Save Today's Check-In";
+    showResult('error','Check-in not saved. Tap Save to try again.',
+      (err && err.code==='UNAUTHENTICATED') ? 'Your sign-in expired. Close Daily Check-In and open it again.' : 'Error: '+((err&&err.code)||'unknown'));
+  });
+});
+paint();
+</script>
+</body>
+</html>
