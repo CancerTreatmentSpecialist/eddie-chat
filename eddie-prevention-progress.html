@@ -500,7 +500,7 @@ function stateCard(icon, title, body, action){
 // Web (page runs inside an iframe): send the whole browser tab to the app; it opens Sign In if signed out.
 // Native app (no iframe): a WebView can't steer the app, so show how to go back.
 // Set to the Eddie Prevention web app address once it is published (leave '' until then).
-const APP_URL = '';
+const APP_URL = 'https://eddieprevention.org/';
 function goToApp(){
   try{ if(APP_URL && window.top !== window.self){ window.top.location.href = APP_URL; return; } }catch(e){}
   const h = document.getElementById('navHint'); if(h) h.style.display = 'block';
