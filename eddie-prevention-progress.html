@@ -168,9 +168,9 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:6px 24px 0}
 
 <script>
 // ===================== CONFIG / AUTH =====================
-// If Eddie Prevention uses its own Firebase project, change these two lines to match it.
-const FIREBASE_API_KEY = "AIzaSyD9QAG0NDfjQ05-WhYJdmcaS8GazK3M8rY";
-const FIREBASE_PROJECT = "cancer-less-rka8v5";
+// Eddie Prevention Firebase project
+const FIREBASE_API_KEY = "AIzaSyBvUypCGmXccD3cCugqATn-WTkF922p6nE";
+const FIREBASE_PROJECT = "eddie-prevention";
 const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
 const queryParams = new URLSearchParams(location.search);
 const idToken = (hashParams.get('t') || queryParams.get('t') || '').trim();
