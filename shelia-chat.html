@@ -56,10 +56,16 @@
   .disclaimer { flex-shrink: 0; font-size: 11px; color: var(--muted); text-align: center; background: #fff;
                 border-top: 1px solid var(--border);
                 padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); }
+  /* "‹ Home" bar, shown only when opened from the Home or Welcome page */
+  #homebar { display:none; flex-shrink:0; padding: calc(10px + env(safe-area-inset-top)) 12px 0; background: var(--bg); }
+  #homebar a { display:inline-block; text-decoration:none; color: var(--brand); font-weight:700; font-size:14px;
+               background: var(--accent-bg); border:1px solid var(--accent); border-radius:20px; padding:6px 14px; }
+  body.from-home #chips { padding-top: 10px; }
   .chat-error { padding: 24px; color: var(--muted); text-align: center; }
 </style>
 </head>
 <body>
+  <div id="homebar"><a href="shelia-home.html?v=1">&#8249; Home</a></div>
   <div id="chips" aria-label="Suggested questions">
     <button data-q="Which screenings do women need at my age, like mammograms and Pap tests?">Screenings I need</button>
     <button data-q="What are common menopause symptoms, and what helps?">Menopause symptoms</button>
@@ -77,6 +83,9 @@
   </div>
 
 <script>
+const PARAMS = new URLSearchParams(location.search);
+if (PARAMS.get('from') === 'home') { document.body.classList.add('from-home'); document.getElementById('homebar').style.display = 'block'; }
+const STARTER_Q = (PARAMS.get('q') || '').trim().slice(0, 300);
 (async function () {
   const CSS = getComputedStyle(document.documentElement);
   const BRAND = CSS.getPropertyValue('--brand').trim(), BG = CSS.getPropertyValue('--bg').trim(), BORDER = CSS.getPropertyValue('--border').trim();
@@ -103,6 +112,8 @@
           directLine.postActivity({ localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             locale, name: 'startConversation', type: 'event' }).subscribe();
           sub.unsubscribe();
+          // Question picked on the Home page: send it automatically, once
+          if (STARTER_Q) setTimeout(() => store.dispatch({ type: 'WEB_CHAT/SEND_MESSAGE', payload: { text: STARTER_Q } }), 1200);
         }
       }
     });

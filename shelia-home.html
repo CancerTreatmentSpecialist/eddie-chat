@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Ask SHELIA · Home</title>
+<!-- Ask SHELIA app Homepage (FlutterFlow WebView, plain URL):
+     https://cancertreatmentspecialist.github.io/eddie-chat/shelia-home.html?v=1 -->
+<style>:root{--bg:#FBF8FD;--card:#fff;--ink:#2A1638;--ink2:#5B4A68;--muted:#7A6C86;--line:#EDE5F3;
+--plum:#4A1D66;--violet:#7B3FA6;--lav:#B68AD6;--soft:#F4EEF9;--rose:#FCEFF4;
+--shadow:0 10px 28px rgba(74,29,102,.09),0 1px 2px rgba(74,29,102,.06)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:28px}
+.wrap{max-width:560px;margin:0 auto}
+.hero{background:linear-gradient(150deg,#6A2E92 0%,var(--plum) 55%,#2E0F45 100%);color:#fff;padding:calc(28px + env(safe-area-inset-top)) 22px 76px;border-radius:0 0 34px 34px;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(182,138,214,.45),rgba(182,138,214,0) 70%)}
+.hero:after{content:"";position:absolute;left:-40px;bottom:-80px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.05)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;opacity:.85;position:relative}
+.hero h1{font-size:32px;line-height:1.08;font-weight:800;letter-spacing:-.025em;margin-top:8px;position:relative}
+.hero p{font-size:15px;opacity:.9;margin-top:10px;position:relative;max-width:420px}
+main{padding:0 16px;margin-top:-50px;position:relative}
+.card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
+h2{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:800;font-size:17px;border-radius:18px;padding:16px;color:#fff;background:linear-gradient(135deg,var(--violet),var(--plum));box-shadow:0 10px 22px rgba(74,29,102,.28)}
+.btn:active,.tile:active,.go:active{transform:scale(.985)}
+.foot{font-size:11.5px;color:var(--muted);text-align:center;padding:10px 16px 0}
+.foot a{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.ask{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--muted);background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:15px 16px;font-size:15.5px;box-shadow:var(--shadow)}
+.ask .s{width:36px;height:36px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ask:after{content:"›";margin-left:auto;font-size:26px;color:var(--violet);font-weight:600}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:22px 4px 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{display:block;text-decoration:none;color:var(--ink);background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:15px 14px}
+.tile .em{width:42px;height:42px;border-radius:14px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:21px}
+.tile b{display:block;font-size:15.5px;margin-top:10px;letter-spacing:-.01em}
+.tile span{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+.tip{background:linear-gradient(135deg,var(--soft),var(--rose));border:1px solid var(--line);border-radius:22px;padding:16px 18px;margin-top:16px}
+.tip .k{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--violet)}
+.tip p{font-size:14.5px;color:var(--ink);margin-top:6px}
+.trust{display:flex;gap:12px;align-items:center;margin-top:16px}
+.trust .ic{width:42px;height:42px;border-radius:14px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.trust b{display:block;font-size:14.5px} .trust span{font-size:13px;color:var(--muted)}
+</style></head>
+<body><div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Ask SHELIA</div>
+    <h1 id="hello">Hello there.</h1>
+    <p>Women's health, clearly explained — private, judgment-free answers whenever you need them.</p>
+  </header>
+  <main>
+    <a class="ask" href="shelia-chat.html?v=2&from=home"><div class="s">💬</div>Ask SHELIA anything…</a>
+
+    <div class="sec"><h2>Explore topics</h2><span class="sub">Tap to ask</span></div>
+    <div class="grid">
+      <a class="tile" href="shelia-chat.html?v=2&from=home&q=Which%20screenings%20do%20women%20need%20at%20my%20age%2C%20like%20mammograms%2C%20Pap%20tests%2C%20and%20HPV%20tests%3F"><div class="em">🩺</div><b>Screenings</b><span>Mammograms, Pap & HPV tests</span></a>
+      <a class="tile" href="shelia-chat.html?v=2&from=home&q=What%20changes%20in%20my%20period%20or%20cycle%20should%20I%20talk%20to%20my%20doctor%20about%3F"><div class="em">🌸</div><b>Periods & cycles</b><span>What's normal, what's not</span></a>
+      <a class="tile" href="shelia-chat.html?v=2&from=home&q=What%20should%20I%20know%20when%20planning%20a%20pregnancy%3F"><div class="em">🤰</div><b>Pregnancy & fertility</b><span>Planning, pregnancy, after birth</span></a>
+      <a class="tile" href="shelia-chat.html?v=2&from=home&q=What%20are%20common%20menopause%20symptoms%2C%20and%20what%20helps%3F"><div class="em">🔥</div><b>Menopause</b><span>Symptoms and what helps</span></a>
+      <a class="tile" href="shelia-chat.html?v=2&from=home&q=How%20is%20heart%20disease%20different%20in%20women%2C%20and%20how%20can%20I%20lower%20my%20risk%3F"><div class="em">❤️</div><b>Heart health</b><span>Women's signs & risks</span></a>
+      <a class="tile" href="shelia-chat.html?v=2&from=home&q=What%20should%20I%20know%20about%20breast%20and%20ovarian%20cancer%20genetics%2C%20like%20BRCA%3F"><div class="em">🎗️</div><b>Breast & ovarian</b><span>BRCA, family history</span></a>
+      <a class="tile" href="shelia-chat.html?v=2&from=home&q=How%20can%20stress%20and%20poor%20sleep%20affect%20women%27s%20health%2C%20and%20what%20helps%3F"><div class="em">😌</div><b>Stress & sleep</b><span>Mood, rest, balance</span></a>
+      <a class="tile" href="shelia-chat.html?v=2&from=home&q=How%20can%20I%20keep%20my%20bones%20strong%20as%20I%20get%20older%3F"><div class="em">🦴</div><b>Bones & aging</b><span>Osteoporosis & strength</span></a>
+    </div>
+
+    <div class="tip"><div class="k">Did you know?</div>
+      <p id="tipText">Heart disease is the leading cause of death for women in the U.S., and women's symptoms can be subtler than chest pain. Ask SHELIA about the signs.</p></div>
+
+    <div class="card trust">
+      <div class="ic">🩺</div>
+      <div><b>Created by a physician</b><span>Built by Derrick J. Beech, MD, FACS, to help women make informed health decisions.</span></div>
+    </div>
+
+    <p class="foot">SHELIA provides educational information only — not medical advice. Always consult your physician for personalized care. In an emergency, call 911.<br>
+      <a href="https://askshelia.org">askshelia.org</a></p>
+  </main>
+</div>
+<script>
+var h=new Date().getHours();
+document.getElementById('hello').textContent = h<12 ? 'Good morning.' : h<17 ? 'Good afternoon.' : 'Good evening.';
+var tips=[
+ "Heart disease is the leading cause of death for women in the U.S., and women's symptoms can be subtler than chest pain. Ask SHELIA about the signs.",
+ "Most cervical cancers can be prevented with HPV vaccination and regular screening. Ask SHELIA which tests you need and when.",
+ "Weight-bearing exercise like walking and strength training helps keep bones strong at every age.",
+ "A family history of breast or ovarian cancer can matter on either parent's side. Ask SHELIA what questions to bring to your doctor."
+];
+document.getElementById('tipText').textContent = tips[new Date().getDate() % tips.length];
+</script>
+</body></html>
