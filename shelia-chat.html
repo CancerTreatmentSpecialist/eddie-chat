@@ -7,8 +7,8 @@
 <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
 <style>
   /* SHELIA colors — deep purple brand, lavender accents (match FlutterFlow Theme) */
-  :root { --brand: #4A1D66;     /* deep purple: your bubbles, send + mic buttons */
-          --accent: #8E5CB8;    /* lavender: chip outlines */
+  :root { --brand: #5B3C89;     /* deep purple: your bubbles, send + mic buttons */
+          --accent: #8A5DC0;    /* lavender: chip outlines */
           --accent-bg: #F4EEF9; /* light lavender: chip fill */
           --radius: 14px;
           --muted: #6b6475; --bg: #FBF8FD; --border: #EAE3F0; }
@@ -61,6 +61,20 @@
   #homebar a { display:inline-block; text-decoration:none; color: var(--brand); font-weight:700; font-size:14px;
                background: var(--accent-bg); border:1px solid var(--accent); border-radius:20px; padding:6px 14px; }
   body.from-home #chips { padding-top: 10px; }
+  /* AI consent gate (Apple 5.1.2) */
+  #consent { position: fixed; inset: 0; z-index: 50; background: rgba(42,22,56,.55); display: none;
+             align-items: flex-end; justify-content: center; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+  #consent.show { display: flex; }
+  #consent .box { background: #fff; border-radius: 22px; max-width: 520px; width: 100%; padding: 20px; max-height: 90vh; overflow: auto;
+                  box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  #consent h2 { font-size: 19px; color: var(--brand); margin: 0 0 8px; }
+  #consent p, #consent li { font-size: 14.5px; line-height: 1.45; color: #3b2d47; }
+  #consent ul { padding-left: 20px; margin: 8px 0; }
+  #consent li { margin: 4px 0; }
+  #consent a { color: var(--brand); font-weight: 700; }
+  #consent .agree { display:block; width:100%; border:0; border-radius:14px; padding:14px; margin-top:14px; font: inherit; font-size:16px;
+                    font-weight:800; color:#fff; background: var(--brand); cursor:pointer; }
+  #consent .decline { display:block; width:100%; border:0; background:none; padding:12px; font: inherit; font-size:15px; color: var(--muted); cursor:pointer; }
   .chat-error { padding: 24px; color: var(--muted); text-align: center; }
 </style>
 </head>
@@ -77,6 +91,22 @@
 
   <div id="webchat" role="main"></div>
 
+  <div id="consent" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
+    <div class="box">
+      <h2 id="consentTitle">Before you chat with SHELIA</h2>
+      <p>SHELIA is an AI assistant. To answer you:</p>
+      <ul>
+        <li>Your questions are sent to <b>Microsoft Copilot Studio</b>, a third-party AI service, which generates the replies.</li>
+        <li>Microsoft may keep chat transcripts for a limited time to run and secure the service.</li>
+        <li>No account is needed. <b>Please don't share your name, contact details, or other personal identifiers.</b></li>
+        <li>SHELIA gives general education only, not medical advice. AI answers can be wrong. Always check with your doctor. In an emergency, call 911.</li>
+      </ul>
+      <p>See our <a href="shelia-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</p>
+      <button class="agree" id="agreeBtn">I understand and agree</button>
+      <button class="decline" id="declineBtn">Not now</button>
+    </div>
+  </div>
+
   <div class="disclaimer">
     Shelia provides educational information only — not medical advice. Always consult your physician for personalized care.
     Please don't share personal identifying information.
@@ -86,7 +116,22 @@
 const PARAMS = new URLSearchParams(location.search);
 if (PARAMS.get('from') === 'home') { document.body.classList.add('from-home'); document.getElementById('homebar').style.display = 'block'; }
 const STARTER_Q = (PARAMS.get('q') || '').trim().slice(0, 300);
+const CONSENT_KEY = 'shelia_ai_consent_v1';
+function hasConsent(){ try { return localStorage.getItem(CONSENT_KEY) === 'yes'; } catch(e) { return false; } }
+function askConsent(){
+  return new Promise(resolve => {
+    if (hasConsent()) return resolve();
+    const c = document.getElementById('consent'); c.classList.add('show');
+    document.getElementById('agreeBtn').onclick = () => { try { localStorage.setItem(CONSENT_KEY, 'yes'); } catch(e) {} c.classList.remove('show'); resolve(); };
+    document.getElementById('declineBtn').onclick = () => {
+      c.classList.remove('show');
+      document.getElementById('webchat').innerHTML = '<div class="chat-error">SHELIA needs your agreement before chatting.<br><br><button style="border:0;border-radius:14px;padding:12px 20px;font:inherit;font-weight:800;color:#fff;background:#5B3C89" onclick="location.reload()">Review again</button></div>';
+      document.getElementById('chips').style.display = 'none';
+    };
+  });
+}
 (async function () {
+  await askConsent();
   const CSS = getComputedStyle(document.documentElement);
   const BRAND = CSS.getPropertyValue('--brand').trim(), BG = CSS.getPropertyValue('--bg').trim(), BORDER = CSS.getPropertyValue('--border').trim();
   const RADIUS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--radius'), 10) || 14;
