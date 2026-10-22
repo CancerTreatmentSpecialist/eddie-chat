@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Eddie Prevention · Home</title>
+<!--
+  Eddie Prevention — app Homepage (WebView).
+  FlutterFlow WebView URL (Combine Text):
+    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-home.html?v=1#t=  +  Authenticated User → Id token (JWT token)
+  Buttons open the Daily, Weekly, and My Progress pages inside this same WebView (each has a "‹ Home" link back).
+  Reads the user's own daily_logs (owner-only rules) to show today's status and streaks.
+-->
+<style>
+:root{
+  --bg:#f3f8fc; --card:#fff; --ink:#14213d; --ink-2:#4b5563; --muted:#6b7280; --line:#e3ebf3;
+  --brand:#1B9BD7; --brand-ink:#0b74a8; --deep:#0b4f8a; --soft:#e6f5fc; --good:#16a34a; --good-soft:#e8f7ee;
+  --shadow:0 10px 28px rgba(11,79,138,.08), 0 1px 2px rgba(11,79,138,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:28px}
+.wrap{max-width:560px;margin:0 auto}
+.hero{background:linear-gradient(140deg,#27ADE6 0%,var(--brand) 45%,var(--deep) 100%);color:#fff;padding:calc(30px + env(safe-area-inset-top)) 22px 78px;border-radius:0 0 34px 34px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-70px;top:-70px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.hello{font-size:15px;opacity:.92;margin-top:14px}
+.hero h1{font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.03em;margin-top:4px}
+main{padding:0 16px;margin-top:-54px;position:relative}
+.card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
+.today{display:flex;align-items:center;gap:14px}
+.today .dot{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--soft)}
+.today.done .dot{background:var(--good-soft)}
+.today b{display:block;font-size:16px}
+.today span{font-size:13.5px;color:var(--muted)}
+.streaks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.st{background:var(--bg);border-radius:16px;padding:12px 6px;text-align:center}
+.st .n{font-size:26px;font-weight:800;color:var(--deep);line-height:1.1}
+.st .l{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.25}
+.go{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 16px;margin-bottom:12px}
+.go .ic{width:50px;height:50px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;background:var(--soft)}
+.go b{display:block;font-size:17px;letter-spacing:-.01em}
+.go span{font-size:13.5px;color:var(--muted)}
+.go:after{content:"›";margin-left:auto;font-size:28px;color:var(--brand-ink);font-weight:600}
+.go.primary{background:linear-gradient(135deg,var(--brand),var(--deep));color:#fff;box-shadow:0 10px 24px rgba(11,79,138,.28)}
+.go.primary .ic{background:rgba(255,255,255,.18)}
+.go.primary span{color:rgba(255,255,255,.88)}
+.go.primary:after{color:#fff}
+.go:active{transform:scale(.985)}
+.guest{display:none;background:#fff4e5;color:#7c2d12;border-radius:16px;padding:12px 14px;font-size:13.5px;margin-bottom:14px}
+.guest.show{display:block}
+.quote{font-size:14.5px;color:var(--ink-2)}
+.quote b{display:block;margin-top:8px;font-size:12.5px;color:var(--deep)}
+.help{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);font-size:14px}
+.help .ic{width:38px;height:38px;border-radius:12px;background:#fdecec;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.help span{color:var(--muted);font-size:12.5px;display:block}
+.foot{font-size:11.5px;color:var(--muted);text-align:center;padding:8px 14px 0}
+.foot a{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Eddie Prevention</div>
+    <div class="hello" id="hello">Welcome</div>
+    <h1>Small habits.<br>Lifelong protection.</h1>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="today" id="today">
+        <div class="dot" id="todayIcon">📝</div>
+        <div><b id="todayTitle">Ready for today's check-in?</b><span id="todaySub">It takes about two minutes.</span></div>
+      </div>
+      <div class="streaks">
+        <div class="st"><div class="n" id="sCheck">0</div><div class="l">day check-in<br>streak</div></div>
+        <div class="st"><div class="n" id="sTob">0</div><div class="l">tobacco-free<br>days</div></div>
+        <div class="st"><div class="n" id="sAlc">0</div><div class="l">alcohol-free<br>days</div></div>
+      </div>
+    </div>
+
+    <div class="guest" id="guest">You're in guest mode. Guest check-ins are deleted after 30 days — create a free account from the Sign In screen to keep your progress.</div>
+
+    <a class="go primary" id="goDaily" href="eddie-prevention-daily.html?v=1">
+      <div class="ic">✅</div><div><b>Daily Check-In</b><span>Activity, sleep, food, alcohol, tobacco</span></div>
+    </a>
+    <a class="go" id="goWeekly" href="eddie-prevention-weekly.html?v=1">
+      <div class="ic">🗓️</div><div><b>Weekly Check-In</b><span>Fiber, stress, weight, blood pressure</span></div>
+    </a>
+    <a class="go" id="goProgress" href="eddie-prevention-progress.html?v=1">
+      <div class="ic">📊</div><div><b>My Progress</b><span>Streaks, trends, and your targets</span></div>
+    </a>
+
+    <div class="card">
+      <div class="quote">"Prevention isn't one big decision. It's small choices, made daily."
+        <b>— Derrick J. Beech, MD, FACS · Surgical Oncologist</b></div>
+    </div>
+
+    <div class="card">
+      <a class="help" id="goHelp" href="eddie-prevention-help.html?v=1">
+        <div class="ic">💬</div><div><b>Need support?</b><span>Quitlines, craving tips, and crisis help</span></div>
+      </a>
+    </div>
+
+    <p class="foot">Educational information only — not medical advice.<br>
+      <a href="https://eddieprevention.org/disclaimer.html">Disclaimer</a> ·
+      <a href="https://eddieprevention.org/privacy.html">Privacy</a> ·
+      <a href="https://eddieprevention.org/terms.html">Terms</a></p>
+  </main>
+</div>
+
+<script>
+const FIREBASE_API_KEY = "AIzaSyBvUypCGmXccD3cCugqATn-WTkF922p6nE";
+const FIREBASE_PROJECT = "eddie-prevention";
+const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+const queryParams = new URLSearchParams(location.search);
+const idToken = (hashParams.get('t') || queryParams.get('t') || '').trim();
+function claims(tok){
+  try{ const part = tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    return JSON.parse(decodeURIComponent(escape(atob(part + '==='.slice((part.length+3)%4))))); }catch(e){ return {}; }
+}
+const c = idToken ? claims(idToken) : {};
+const uid = c.user_id || c.sub || '';
+const isGuest = !!(c.firebase && c.firebase.sign_in_provider === 'anonymous');
+const $ = id => document.getElementById(id);
+
+// Greeting
+const h = new Date().getHours();
+$('hello').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+if(isGuest) $('guest').classList.add('show');
+
+// Pass the sign-in token along so each page knows who you are, and add a "Home" link back
+if(idToken){
+  const tail = '#t=' + encodeURIComponent(idToken) + '&from=home';
+  ['goDaily','goWeekly','goProgress'].forEach(id => $(id).href += tail);
+  $('goHelp').href += '#from=home&t=' + encodeURIComponent(idToken);
+}
+
+// Today's status + streaks from the user's own daily check-ins
+const dayKey = d => d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
+const addDays = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+function run(days, test){
+  let d = new Date(); d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  if(!days.has(dayKey(d))) d = addDays(d,-1);
+  let n = 0;
+  while(days.has(dayKey(d)) && test(days.get(dayKey(d)))){ n++; d = addDays(d,-1); }
+  return n;
+}
+async function load(){
+  if(!uid) return;
+  const base = 'projects/'+FIREBASE_PROJECT+'/databases/(default)/documents';
+  const r = await fetch('https://firestore.googleapis.com/v1/'+base+':runQuery?key='+FIREBASE_API_KEY, {
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+    body: JSON.stringify({structuredQuery:{from:[{collectionId:'daily_logs'}],
+      where:{fieldFilter:{field:{fieldPath:'userId'},op:'EQUAL',value:{stringValue:uid}}},
+      orderBy:[{field:{fieldPath:'createdTime'},direction:'DESCENDING'}], limit:120}})
+  });
+  if(!r.ok) return;
+  const rows = (await r.json()).filter(x=>x.document).map(x=>x.document.fields||{});
+  const days = new Map();   // latest entry per day
+  rows.forEach(f=>{
+    if(!f.createdTime) return;
+    const t = new Date(f.createdTime.timestampValue);
+    const k = dayKey(t);
+    if(days.has(k)) return;
+    const tob = f.tobaccoUsed ? f.tobaccoUsed.booleanValue : null;
+    const drinks = f.alcoholDrinks ? Number(f.alcoholDrinks.integerValue) : null;
+    const alc = f.alcoholUsed ? f.alcoholUsed.booleanValue : (drinks===null ? null : drinks>0);
+    days.set(k, {tobFree: tob===null ? null : !tob, alcFree: alc===null ? null : !alc});
+  });
+  $('sCheck').textContent = run(days, ()=>true);
+  $('sTob').textContent = run(days, e=>e.tobFree===true);
+  $('sAlc').textContent = run(days, e=>e.alcFree===true);
+  if(days.has(dayKey(new Date()))){
+    $('today').classList.add('done');
+    $('todayIcon').textContent = '🎉';
+    $('todayTitle').textContent = "Today's check-in is done";
+    $('todaySub').textContent = 'Nice work. See you tomorrow!';
+    $('goDaily').querySelector('span').textContent = 'Done for today · tap to update';
+  }
+}
+load().catch(()=>{});
+</script>
+</body>
+</html>
