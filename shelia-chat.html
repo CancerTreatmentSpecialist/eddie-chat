@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Ask Shelia</title>
+<script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+<style>
+  /* SHELIA colors — deep purple brand, lavender accents (match FlutterFlow Theme) */
+  :root { --brand: #4A1D66;     /* deep purple: your bubbles, send + mic buttons */
+          --accent: #8E5CB8;    /* lavender: chip outlines */
+          --accent-bg: #F4EEF9; /* light lavender: chip fill */
+          --radius: 14px;
+          --muted: #6b6475; --bg: #FBF8FD; --border: #EAE3F0; }
+  * { box-sizing: border-box; }
+
+  /* Lock the page so only the chat scrolls (keeps chips in place) */
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--bg);
+    font-family: -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+  body { display: flex; flex-direction: column; height: 100dvh; }
+
+  /* Starter question chips — 2x2 grid, clear of the iPhone status bar */
+  #chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0;
+           padding: calc(12px + env(safe-area-inset-top)) 12px 8px; background: var(--bg); }
+  #chips button { border: 1px solid var(--accent); color: var(--brand); background: var(--accent-bg); border-radius: var(--radius);
+                  padding: 9px 8px; font-size: 14px; line-height: 1.25; white-space: normal; cursor: pointer; font-family: inherit; }
+
+  /* Chat fills the remaining screen and scrolls on its own */
+  #webchat { flex: 1; min-height: 0; position: relative; }
+  #webchat > div { height: 100%; }
+  #webchat .webchat__bubble__content { font-size: 16px; line-height: 1.45;
+                                       border-radius: var(--radius) !important; overflow: hidden; }
+
+  /* ===== SEND BOX FIX — visible textarea AND its hidden measuring copy must match ===== */
+  #webchat input,
+  #webchat textarea,
+  #webchat .webchat__auto-resize-textarea__textarea,
+  #webchat .webchat__auto-resize-textarea__doppelganger {
+    font-size: 16px !important;      /* stops iPhone zoom */
+    line-height: 1.4 !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-family: inherit !important;
+  }
+  #webchat .webchat__auto-resize-textarea { min-height: 34px; }
+  #webchat .webchat__send-box__main { min-height: 52px; align-items: center; }
+  #webchat .webchat__send-box-text-box { padding-top: 4px; padding-bottom: 4px; }
+  /* ===== END FIX ===== */
+
+  /* Microphone button — brand color, easy to tap */
+  #webchat .webchat__microphone-button { min-width: 44px; }
+  #webchat .webchat__microphone-button svg { fill: var(--brand); }
+  #webchat .webchat__microphone-button--dictating svg { fill: #dc2626; } /* red while listening */
+
+  /* Disclaimer (keep — Apple required this) */
+  .disclaimer { flex-shrink: 0; font-size: 11px; color: var(--muted); text-align: center; background: #fff;
+                border-top: 1px solid var(--border);
+                padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); }
+  .chat-error { padding: 24px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+  <div id="chips" aria-label="Suggested questions">
+    <button data-q="Which screenings do women need at my age, like mammograms and Pap tests?">Screenings I need</button>
+    <button data-q="What are common menopause symptoms, and what helps?">Menopause symptoms</button>
+    <button data-q="What changes in my period should I talk to my doctor about?">Period &amp; cycle changes</button>
+    <button data-q="How is heart disease different in women, and how can I lower my risk?">Heart health for women</button>
+    <button data-q="What should I know about breast and ovarian cancer genetics, like BRCA?">BRCA &amp; family history</button>
+    <button data-q="What questions should I ask at my next OB-GYN visit?">Ask my OB-GYN</button>
+  </div>
+
+  <div id="webchat" role="main"></div>
+
+  <div class="disclaimer">
+    Shelia provides educational information only — not medical advice. Always consult your physician for personalized care.
+    Please don't share personal identifying information.
+  </div>
+
+<script>
+(async function () {
+  const CSS = getComputedStyle(document.documentElement);
+  const BRAND = CSS.getPropertyValue('--brand').trim(), BG = CSS.getPropertyValue('--bg').trim(), BORDER = CSS.getPropertyValue('--border').trim();
+  const RADIUS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--radius'), 10) || 14;
+  const chips = document.getElementById('chips');
+
+  try {
+    const tokenEndpointURL = new URL('https://default55392b7f41f9468a8aaec256bc68af.e5.environment.api.powerplatform.com/powervirtualagents/botsbyschema/auto_agent_sG_Tp/directline/token?api-version=2022-03-01-preview');
+    const locale = 'en-US'; // full locale needed for voice recognition
+    const apiVersion = tokenEndpointURL.searchParams.get('api-version');
+
+    const [directLineURL, token] = await Promise.all([
+      fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+        .then(r => r.json()).then(({ channelUrlsById: { directline } }) => directline),
+      fetch(tokenEndpointURL).then(r => r.json()).then(({ token }) => token)
+    ]);
+
+    const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
+
+    // Shelia's greeting
+    const sub = directLine.connectionStatus$.subscribe({
+      next(status) {
+        if (status === 2) {
+          directLine.postActivity({ localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            locale, name: 'startConversation', type: 'event' }).subscribe();
+          sub.unsubscribe();
+        }
+      }
+    });
+
+    // Hide chips once the user sends any message
+    const store = WebChat.createStore({}, () => next => action => {
+      if (action.type === 'WEB_CHAT/SEND_MESSAGE') chips.style.display = 'none';
+      return next(action);
+    });
+
+    // Tapping a chip sends its full question
+    chips.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        store.dispatch({ type: 'WEB_CHAT/SEND_MESSAGE', payload: { text: btn.dataset.q } });
+      });
+    });
+
+    const styleOptions = {
+      bubbleMaxWidth: 1400,               // full-width replies
+      hideUploadButton: true,
+      backgroundColor: BG,
+      bubbleBorderColor: BORDER,
+
+      // Rounded corners on all bubbles, no "tail" corners
+      bubbleBorderRadius: RADIUS,
+      bubbleFromUserBorderRadius: RADIUS,
+      bubbleNubSize: 0,
+      bubbleFromUserNubSize: 0,
+
+      bubbleFromUserBackground: BRAND,
+      bubbleFromUserTextColor: '#ffffff',
+      bubbleFromUserBorderColor: BRAND,
+
+      // Larger, easier-to-tap typing bar
+      sendBoxHeight: 52,
+      sendBoxTextWrap: true,              // long questions wrap instead of scrolling sideways
+      sendBoxMaxHeight: 140,              // grows up to ~5 lines, then scrolls
+      sendBoxBackground: '#ffffff',
+      sendBoxBorderTop: `solid 1px ${BORDER}`,
+      suggestedActionBorderColor: BRAND,
+      suggestedActionTextColor: BRAND,
+      sendBoxButtonColor: BRAND,
+      sendBoxButtonColorOnHover: BRAND
+    };
+
+    // Microphone: browser's built-in speech (Chrome, Edge, Safari). Only added if the browser supports it.
+    const speechSupported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    const webSpeechPonyfillFactory = speechSupported
+      ? WebChat.createBrowserWebSpeechPonyfillFactory()
+      : undefined;
+
+    WebChat.renderWebChat(
+      { directLine, locale, store, styleOptions, webSpeechPonyfillFactory },
+      document.getElementById('webchat')
+    );
+  } catch (e) {
+    document.getElementById('webchat').innerHTML =
+      '<div class="chat-error">Shelia is temporarily unavailable. Please try again shortly.</div>';
+  }
+})();
+</script>
+</body>
+</html>
