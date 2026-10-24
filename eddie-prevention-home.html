@@ -58,6 +58,21 @@ main{padding:0 16px;margin-top:-54px;position:relative}
 .foot a{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<script>
+// Sign in / create account. Web: open the app's Sign In page in the whole browser tab.
+// Native app: a page inside the app can't switch screens, so point to the Sign In button on Home.
+var EP_SIGNIN_URL = 'https://app.eddieprevention.org/createAccount';
+function epInFrame(){ try{ return window.top !== window.self; }catch(e){ return true; } }
+function epGoSignIn(){ try{ window.top.location.href = EP_SIGNIN_URL; }catch(e){ window.open(EP_SIGNIN_URL, '_top'); } }
+function epSignInDetail(){
+  return epInFrame()
+    ? '<button type="button" class="ep-signin" onclick="epGoSignIn()">Sign in or create a free account &rarr;</button>'
+    : 'Go back to Home and tap <b>Sign In / Create Account</b> at the top.';
+}
+</script>
+<style>
+.ep-signin{display:block;width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px 16px;font:700 15px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;background:linear-gradient(135deg,#1B9BD7,#0b4f8a);cursor:pointer}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -82,6 +97,9 @@ main{padding:0 16px;margin-top:-54px;position:relative}
 
     <div class="guest" id="guest">You're in guest mode. Guest check-ins are deleted after 30 days — create a free account from the Sign In screen to keep your progress.</div>
 
+    <a class="go" id="goSignIn" href="#" style="display:none" onclick="epGoSignIn();return false;">
+      <div class="ic">🔐</div><div><b>Sign in or create a free account</b><span>Save your check-ins, streaks, and progress</span></div>
+    </a>
     <a class="go primary" id="goDaily" href="eddie-prevention-daily.html?v=1">
       <div class="ic">✅</div><div><b>Daily Check-In</b><span>Activity, sleep, food, alcohol, tobacco</span></div>
     </a>
@@ -129,6 +147,8 @@ const $ = id => document.getElementById(id);
 const h = new Date().getHours();
 $('hello').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
 if(isGuest) $('guest').classList.add('show');
+// Web only: show the Sign In card when signed out or in guest mode (the app shows its own button)
+if(epInFrame() && (!idToken || isGuest)) $('goSignIn').style.display = 'flex';
 
 // Pass the sign-in token along so each page knows who you are, and add a "Home" link back
 if(idToken){
