@@ -66,7 +66,7 @@ function epInFrame(){ try{ return window.top !== window.self; }catch(e){ return 
 function epGoSignIn(){ try{ window.top.location.href = EP_SIGNIN_URL; }catch(e){ window.open(EP_SIGNIN_URL, '_top'); } }
 function epSignInDetail(){
   return epInFrame()
-    ? '<button type="button" class="ep-signin" onclick="epGoSignIn()">Sign in or create a free account &rarr;</button>'
+    ? '<a class="ep-signin" style="text-align:center;text-decoration:none" href="'+EP_SIGNIN_URL+'" target="_top">Sign in or create a free account &rarr;</a>'
     : 'Go back to Home and tap <b>Sign In / Create Account</b> at the top.';
 }
 </script>
@@ -130,7 +130,7 @@ function epSignInDetail(){
 
     <div class="guest" id="guest">You're in guest mode. Guest check-ins are deleted after 30 days — create a free account from the Sign In screen to keep your progress.</div>
 
-    <a class="go" id="goSignIn" href="#" style="display:none" onclick="epGoSignIn();return false;">
+    <a class="go" id="goSignIn" href="https://app.eddieprevention.org/createAccount" target="_top" style="display:none">
       <div class="ic">🔐</div><div><b>Sign in or create a free account</b><span>Save your check-ins, streaks, and progress</span></div>
     </a>
     <a class="go primary" id="goDaily" href="eddie-prevention-daily.html?v=1">
@@ -158,6 +158,7 @@ function epSignInDetail(){
       <div class="acct-h">Your account</div>
       <div class="acct-brand">Eddie <span>Prevention</span></div>
       <div class="acct-who" id="acctWho"></div>
+      <a class="acct-out" id="acctSignIn" href="https://app.eddieprevention.org/createAccount" target="_top" style="display:none;text-decoration:none">Sign in or create account</a>
       <div class="acct-only"><a class="acct-out" id="btnSignOut" href="https://app.eddieprevention.org/signOut" target="_top" style="text-decoration:none">Sign out</a>
         <div class="acct-fallback" id="signOutFallback">If nothing happened, <a href="https://app.eddieprevention.org/signOut" target="_blank" rel="noopener">tap here to sign out</a>.</div></div>
       <div class="acct-links">
@@ -194,6 +195,7 @@ function claims(tok){
 }
 const c = idToken ? claims(idToken) : {};
 const uid = c.user_id || c.sub || '';
+const signedIn = !!uid;
 const isGuest = !!(c.firebase && c.firebase.sign_in_provider === 'anonymous');
 const $ = id => document.getElementById(id);
 
@@ -202,7 +204,7 @@ const h = new Date().getHours();
 $('hello').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
 if(isGuest) $('guest').classList.add('show');
 // Web only: show the Sign In card when signed out or in guest mode (the app shows its own button)
-if(epInFrame() && (!idToken || isGuest)) $('goSignIn').style.display = 'flex';
+if(epInFrame() && (!signedIn || isGuest)) $('goSignIn').style.display = 'flex';
 
 // Pass the sign-in token along so each page knows who you are, and add a "Home" link back
 if(idToken){
@@ -261,8 +263,9 @@ const SIGNOUT_URL = 'https://app.eddieprevention.org/signOut';
 (function(){
   const web = epInFrame();
   const acctEl = $('acct');
-  if(web && idToken) acctEl.classList.add('web');
-  $('acctWho').textContent = !idToken ? '' : isGuest ? 'Guest mode' : (c.email ? 'Signed in as ' + c.email : 'Signed in');
+  if(web && signedIn) acctEl.classList.add('web');
+  $('acctWho').textContent = !signedIn ? '' : isGuest ? 'Guest mode' : (c.email ? 'Signed in as ' + c.email : 'Signed in');
+  if(web && (!signedIn || isGuest)){ $('acctSignIn').style.display = 'inline-block'; if(isGuest) $('acctSignIn').textContent = 'Create a free account'; }
   $('btnSignOut').addEventListener('click', ()=>{ setTimeout(()=>$('signOutFallback').classList.add('show'), 1500); });
   const modal = $('delModal'), msg = $('delMsg'), go = $('delGo');
   const close = ()=>{ modal.classList.remove('show'); msg.style.display='none'; go.disabled=false; go.textContent='Delete'; };

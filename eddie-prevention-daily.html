@@ -84,7 +84,7 @@ function epInFrame(){ try{ return window.top !== window.self; }catch(e){ return 
 function epGoSignIn(){ try{ window.top.location.href = EP_SIGNIN_URL; }catch(e){ window.open(EP_SIGNIN_URL, '_top'); } }
 function epSignInDetail(){
   return epInFrame()
-    ? '<button type="button" class="ep-signin" onclick="epGoSignIn()">Sign in or create a free account &rarr;</button>'
+    ? '<a class="ep-signin" style="text-align:center;text-decoration:none" href="'+EP_SIGNIN_URL+'" target="_top">Sign in or create a free account &rarr;</a>'
     : 'Go back to Home and tap <b>Sign In / Create Account</b> at the top.';
 }
 </script>
