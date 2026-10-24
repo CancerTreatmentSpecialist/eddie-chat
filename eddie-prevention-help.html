@@ -141,48 +141,7 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     <p class="foot">Eddie Prevention provides educational information only and is not a substitute for professional medical advice. Talk with your doctor about what's right for you.</p>
   </main>
 </div>
-<!-- Web-only bottom nav (phones/tablets in a browser). Hidden in the native app and on laptops. -->
-<style>
-#epWebNav{display:none}
-html.epNavOn,html.epNavOn body{height:100%;overflow:hidden}
-html.epNavOn body{display:flex;flex-direction:column;padding-bottom:0!important}
-#epScroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:28px}
-html.epNavOn #epWebNav{display:block;flex:0 0 auto;background:#fff;border-top:1px solid #e3ebf3;box-shadow:0 -4px 16px rgba(11,79,138,.08);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
-#epWebNav .in{display:flex;max-width:560px;margin:0 auto}
-#epWebNav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#6b7280;font:600 11px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:4px 0}
-#epWebNav a .i{font-size:20px;line-height:1}
-#epWebNav a.on{color:#1B9BD7}
-</style>
-<nav id="epWebNav"><div class="in">
-  <a data-p="eddie-prevention-daily.html"><span class="i">✅</span>Daily</a>
-  <a data-p="eddie-prevention-weekly.html"><span class="i">🗓️</span>Weekly</a>
-  <a data-p="eddie-prevention-home.html"><span class="i">🏠</span>Home</a>
-  <a data-p="eddie-prevention-progress.html"><span class="i">📊</span>My Progress</a>
-  <a data-p="eddie-prevention-help.html"><span class="i">❔</span>Help</a>
-</div></nav>
-<script>
-(function(){
-  var inFrame = false; try{ inFrame = window.top !== window.self; }catch(e){ inFrame = true; }
-  var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-  if(!inFrame || !touch) return;               // native app or laptop: the app's own nav bar shows
-  var p = new URLSearchParams(location.hash.replace(/^#/,'')), q = new URLSearchParams(location.search);
-  var t = (p.get('t') || q.get('t') || '').trim();
-  var here = location.pathname.split('/').pop();
-  var nav = document.getElementById('epWebNav');
-  nav.querySelectorAll('a').forEach(function(a){
-    var f = a.getAttribute('data-p');
-    a.href = f + '?v=1' + (t ? '#t=' + encodeURIComponent(t) + '&from=home' : '');
-    if(here.indexOf(f.replace('.html','')) === 0) a.classList.add('on');
-  });
-  // Page content scrolls in its own box; nav sits below it (no position:fixed — unreliable in iPhone frames)
-  var box = document.createElement('div'); box.id = 'epScroll';
-  Array.prototype.slice.call(document.body.childNodes).forEach(function(n){
-    if(n !== nav && !(n.tagName === 'SCRIPT')) box.appendChild(n);
-  });
-  document.body.insertBefore(box, nav);
-  document.documentElement.classList.add('epNavOn');
-})();
-</script>
+
 
 </body>
 </html>
