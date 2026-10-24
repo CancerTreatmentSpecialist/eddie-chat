@@ -73,6 +73,36 @@ function epSignInDetail(){
 <style>
 .ep-signin{display:block;width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px 16px;font:700 15px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;background:linear-gradient(135deg,#1B9BD7,#0b4f8a);cursor:pointer}
 </style>
+<style>
+/* ---- Your account (sign out / delete) ---- */
+.acct{background:#fff;border-radius:24px;box-shadow:0 10px 28px rgba(11,79,138,.08),0 1px 2px rgba(11,79,138,.05);padding:22px 18px 18px;margin:6px 0 14px;text-align:center}
+.acct-h{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#6b7280}
+.acct-brand{font-size:22px;font-weight:800;letter-spacing:-.02em;color:#14213d;margin-top:6px}
+.acct-brand span{color:#1B9BD7}
+.acct-who{font-size:13.5px;color:#4b5563;margin-top:4px;word-break:break-all}
+.acct-out{display:inline-block;margin-top:16px;min-width:180px;border:0;border-radius:999px;padding:13px 28px;font:700 15px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;background:linear-gradient(135deg,#1B9BD7,#0b4f8a);box-shadow:0 8px 18px rgba(11,79,138,.22);cursor:pointer}
+.acct-links{display:flex;justify-content:space-between;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #e3ebf3}
+.acct-links a{font-size:14px;font-weight:600;color:#6b7280;text-decoration:none}
+.acct-del{display:block;margin:16px auto 0;background:none;border:0;font:700 15px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#dc2626;cursor:pointer;padding:6px 10px}
+.acct-note{font-size:11.5px;color:#9ca3af;margin-top:14px;line-height:1.4}
+.acct-made{font-size:12.5px;font-weight:700;color:#4b5563;margin-top:2px}
+.acct-only{display:none}
+.acct.web .acct-only{display:block}
+.acct.web .acct-links.acct-only{display:flex}
+/* ---- Delete confirmation ---- */
+.ep-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:10000}
+.ep-modal.show{display:flex}
+.ep-sheet{background:#fff;border-radius:22px;max-width:380px;width:100%;padding:24px 20px 18px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.ep-sheet .big{font-size:40px}
+.ep-sheet h3{font-size:19px;margin-top:6px;color:#14213d}
+.ep-sheet p{font-size:14px;color:#4b5563;margin-top:8px;line-height:1.45}
+.ep-sheet .row{display:flex;gap:10px;margin-top:18px}
+.ep-sheet button{flex:1;border-radius:14px;padding:13px 10px;font:700 15px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer}
+.ep-cancel{background:#f1f5f9;border:0;color:#14213d}
+.ep-confirm{background:#dc2626;border:0;color:#fff}
+.ep-confirm[disabled]{opacity:.6}
+.ep-msg{font-size:13px;margin-top:12px;color:#b91c1c;display:none}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -121,10 +151,30 @@ function epSignInDetail(){
       </a>
     </div>
 
-    <p class="foot">Educational information only — not medical advice.<br>
-      <a href="https://eddieprevention.org/disclaimer.html">Disclaimer</a> ·
-      <a href="https://eddieprevention.org/privacy.html">Privacy</a> ·
-      <a href="https://eddieprevention.org/terms.html">Terms</a></p>
+    <section class="acct" id="acct">
+      <div class="acct-h">Your account</div>
+      <div class="acct-brand">Eddie <span>Prevention</span></div>
+      <div class="acct-who" id="acctWho"></div>
+      <div class="acct-only"><button type="button" class="acct-out" id="btnSignOut">Sign out</button></div>
+      <div class="acct-links">
+        <a href="https://eddieprevention.org/privacy.html" target="_top">Privacy Policy</a>
+        <a href="https://eddieprevention.org/terms.html" target="_top">Terms of Use</a>
+      </div>
+      <div class="acct-only"><button type="button" class="acct-del" id="btnDelete">Delete Account</button></div>
+      <p class="acct-note">Educational purposes only. Not a substitute for professional medical advice.
+        <a href="https://eddieprevention.org/disclaimer.html" target="_top" style="color:inherit">Disclaimer</a></p>
+      <p class="acct-made">Created by Cancer Treatment Specialist</p>
+    </section>
+
+    <div class="ep-modal" id="delModal" role="dialog" aria-modal="true" aria-labelledby="delTitle">
+      <div class="ep-sheet">
+        <div class="big">⚠️</div>
+        <h3 id="delTitle">Delete your account?</h3>
+        <p>This permanently deletes your Eddie Prevention account and all of your daily and weekly check-ins. This can't be undone.</p>
+        <div class="ep-msg" id="delMsg"></div>
+        <div class="row"><button type="button" class="ep-cancel" id="delCancel">Cancel</button><button type="button" class="ep-confirm" id="delGo">Delete</button></div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -201,6 +251,51 @@ async function load(){
   }
 }
 load().catch(()=>{});
+// ---- Your account: Sign out / Delete Account ----
+// Web: these buttons run here. Native app: FlutterFlow's own Sign Out / Delete Account buttons sit below this page.
+const SIGNOUT_URL = 'https://app.eddieprevention.org/signOut';
+(function(){
+  const web = epInFrame();
+  const acctEl = $('acct');
+  if(web && idToken) acctEl.classList.add('web');
+  $('acctWho').textContent = !idToken ? '' : isGuest ? 'Guest mode' : (c.email ? 'Signed in as ' + c.email : 'Signed in');
+  $('btnSignOut').addEventListener('click', ()=>{ try{ window.top.location.href = SIGNOUT_URL; }catch(e){ window.open(SIGNOUT_URL,'_top'); } });
+  const modal = $('delModal'), msg = $('delMsg'), go = $('delGo');
+  const close = ()=>{ modal.classList.remove('show'); msg.style.display='none'; go.disabled=false; go.textContent='Delete'; };
+  $('btnDelete').addEventListener('click', ()=> modal.classList.add('show'));
+  $('delCancel').addEventListener('click', close);
+  modal.addEventListener('click', e=>{ if(e.target===modal) close(); });
+  const fail = t=>{ msg.textContent = t; msg.style.display='block'; go.disabled=false; go.textContent='Try again'; };
+  async function wipe(collection){
+    const base = 'projects/'+FIREBASE_PROJECT+'/databases/(default)/documents';
+    const r = await fetch('https://firestore.googleapis.com/v1/'+base+':runQuery?key='+FIREBASE_API_KEY, {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+      body: JSON.stringify({structuredQuery:{from:[{collectionId:collection}],
+        where:{fieldFilter:{field:{fieldPath:'userId'},op:'EQUAL',value:{stringValue:uid}}}, limit:1000}})
+    });
+    if(!r.ok) return;
+    const docs = (await r.json()).filter(x=>x.document).map(x=>x.document.name);
+    await Promise.all(docs.map(n=>fetch('https://firestore.googleapis.com/v1/'+n, {method:'DELETE', headers:{'Authorization':'Bearer '+idToken}})));
+  }
+  go.addEventListener('click', async ()=>{
+    go.disabled = true; go.textContent = 'Deleting…'; msg.style.display='none';
+    try{
+      await wipe('daily_logs').catch(()=>{});
+      await wipe('weekly_logs').catch(()=>{});
+      const r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:delete?key='+FIREBASE_API_KEY, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({idToken})
+      });
+      if(!r.ok){
+        const e = ((await r.json().catch(()=>({}))).error||{}).message || '';
+        if(/CREDENTIAL_TOO_OLD|TOKEN_EXPIRED|INVALID_ID_TOKEN/.test(e)) return fail('For your security, please sign out, sign back in, and then delete your account.');
+        return fail('Your account was not deleted. Please try again.');
+      }
+      modal.querySelector('.ep-sheet').innerHTML = '<div class="big">✅</div><h3>Account deleted</h3><p>Your account and check-ins have been removed. Thank you for using Eddie Prevention.</p>';
+      setTimeout(()=>{ try{ window.top.location.href = SIGNOUT_URL; }catch(e){} }, 2200);
+    }catch(e){ fail('No connection. Please check your internet and try again.'); }
+  });
+})();
+
 </script>
 <!-- Web-only bottom nav (phones/tablets in a browser). Hidden in the native app and on laptops. -->
 <style>
