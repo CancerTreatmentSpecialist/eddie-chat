@@ -7,10 +7,12 @@
 <!--
   Eddie Prevention — app Homepage (WebView).
   FlutterFlow WebView URL (Combine Text):
-    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-home.html?v=2#t=  +  Authenticated User → Id token (JWT token)
+    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-home.html?v=3#t=  +  Authenticated User → Id token (JWT token)
   Buttons open the Daily, Weekly, and My Progress pages inside this same WebView (each has a "‹ Home" link back).
   Reads the user's own daily_logs (owner-only rules) to show today's status and streaks.
-  v2 (Nov 18, 2026): signup links try a new tab, then fall back to this frame (target="_top" is blocked inside the WebView); guests who finish today's check-in see a keep-it prompt card on every check-in day.
+  v3 (Nov 19, 2026): Sign out is shown whenever signed in (it was hidden in the app by a frame check) and uses the
+  new-tab-then-same-frame chain (target="_top" is blocked inside the WebView); the page re-checks its sign-in state
+  every time it comes back into view, so guest cards disappear once a real sign-in lands; footer links use the same chain.
 -->
 <style>
 :root{
@@ -63,25 +65,30 @@ main{padding:0 16px;margin-top:-54px;position:relative}
 // Sign in / create account. Web: open the app's Sign In page in the whole browser tab.
 // Native app: a page inside the app can't switch screens, so point to the Sign In button on Home.
 var EP_SIGNIN_URL = 'https://app.eddieprevention.org/createAccount';
+var EP_SIGNOUT_URL = 'https://app.eddieprevention.org/signOut';
 function epInFrame(){ try{ return window.top !== window.self; }catch(e){ return true; } }
 function epGoSignIn(){ try{ window.top.location.href = EP_SIGNIN_URL; }catch(e){ window.open(EP_SIGNIN_URL, '_top'); } }
-// Signup links: this page runs inside the app's WebView frame, where a plain
+// Links out of this page: this page runs inside the app's WebView frame, where a plain
 // target="_top" link is silently blocked. Try a new tab first (best on the web:
 // the app stays open); if popups are blocked, fall back to navigating this
-// frame to the signup page. If a tab opened but nothing visibly happened,
-// show the "tap here" fallback lines after 2 seconds.
-function epOpenSignUp(e){
+// frame to the URL. If a tab opened but nothing visibly happened, show the
+// "tap here" fallback lines after 2 seconds (signup only — pass a selector).
+function epOpenExternal(url, e, fallbackSel){
   if(e) e.preventDefault();
   var w = null;
-  try{ w = window.open(EP_SIGNIN_URL, '_blank', 'noopener'); }catch(err){ w = null; }
-  if(!w){ window.location.href = EP_SIGNIN_URL; return false; }
-  setTimeout(function(){
-    if(!document.hidden){
-      document.querySelectorAll('.signup-fallback').forEach(function(el){ el.classList.add('show'); });
-    }
-  }, 2000);
+  try{ w = window.open(url, '_blank', 'noopener'); }catch(err){ w = null; }
+  if(!w){ window.location.href = url; return false; }
+  if(fallbackSel){
+    setTimeout(function(){
+      if(!document.hidden){
+        document.querySelectorAll(fallbackSel).forEach(function(el){ el.classList.add('show'); });
+      }
+    }, 2000);
+  }
   return false;
 }
+function epOpenSignUp(e){ return epOpenExternal(EP_SIGNIN_URL, e, '.signup-fallback'); }
+function epOpenSignOut(e){ return epOpenExternal(EP_SIGNOUT_URL, e, null); }
 function epSignInDetail(){
   return epInFrame()
     ? '<a class="ep-signin" style="text-align:center;text-decoration:none" href="'+EP_SIGNIN_URL+'" target="_top">Sign in or create a free account &rarr;</a>'
@@ -146,7 +153,7 @@ function epSignInDetail(){
       </div>
     </div>
 
-    <div class="guest" id="guest">You're in guest mode. Guest check-ins are deleted after 30 days — create a free account from the Sign In screen to keep your progress.</div>
+    <div class="guest" id="guest">You're in guest mode. Guest check-ins are deleted after 30 days — create a free account from the Sign In screen to keep your progress.<span style="display:block;margin-top:6px">Already signed in somewhere else? <a href="#" onclick="location.reload();return false;" style="color:#0b74a8;font-weight:700">Tap here to refresh this page</a>.</span></div>
 
     <a class="go" id="goSignIn" href="https://app.eddieprevention.org/createAccount" onclick="return epOpenSignUp(event)" style="display:none">
       <div class="ic">🔐</div><div><b>Sign in or create a free account</b><span>Save your check-ins, streaks, and progress</span></div>
@@ -182,15 +189,15 @@ function epSignInDetail(){
       <div class="acct-who" id="acctWho"></div>
       <a class="acct-out" id="acctSignIn" href="https://app.eddieprevention.org/createAccount" onclick="return epOpenSignUp(event)" style="display:none;text-decoration:none">Sign in or create account</a>
       <div class="acct-fallback signup-fallback" id="signUpFallbackAcct">If nothing happened, <a href="https://app.eddieprevention.org/createAccount">tap here to create your free account</a>.</div>
-      <div class="acct-only"><a class="acct-out" id="btnSignOut" href="https://app.eddieprevention.org/signOut" target="_top" style="text-decoration:none">Sign out</a>
+      <div class="acct-only"><a class="acct-out" id="btnSignOut" href="https://app.eddieprevention.org/signOut" onclick="return epOpenSignOut(event)" style="text-decoration:none">Sign out</a>
         <div class="acct-fallback" id="signOutFallback">If nothing happened, <a href="https://app.eddieprevention.org/signOut" target="_blank" rel="noopener">tap here to sign out</a>.</div></div>
       <div class="acct-links">
-        <a href="https://eddieprevention.org/privacy.html" target="_top">Privacy Policy</a>
-        <a href="https://eddieprevention.org/terms.html" target="_top">Terms of Use</a>
+        <a href="https://eddieprevention.org/privacy.html" onclick="return epOpenExternal('https://eddieprevention.org/privacy.html', event)">Privacy Policy</a>
+        <a href="https://eddieprevention.org/terms.html" onclick="return epOpenExternal('https://eddieprevention.org/terms.html', event)">Terms of Use</a>
       </div>
       <div class="acct-only"><button type="button" class="acct-del" id="btnDelete">Delete Account</button></div>
       <p class="acct-note">Educational purposes only. Not a substitute for professional medical advice.
-        <a href="https://eddieprevention.org/disclaimer.html" target="_top" style="color:inherit">Disclaimer</a></p>
+        <a href="https://eddieprevention.org/disclaimer.html" onclick="return epOpenExternal('https://eddieprevention.org/disclaimer.html', event)" style="color:inherit">Disclaimer</a></p>
       <p class="acct-made">Created by Cancer Treatment Specialist</p>
     </section>
 
@@ -209,32 +216,56 @@ function epSignInDetail(){
 <script>
 const FIREBASE_API_KEY = "AIzaSyBvUypCGmXccD3cCugqATn-WTkF922p6nE";
 const FIREBASE_PROJECT = "eddie-prevention";
-const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
-const queryParams = new URLSearchParams(location.search);
-const idToken = (hashParams.get('t') || queryParams.get('t') || '').trim();
+const $ = id => document.getElementById(id);
 function claims(tok){
   try{ const part = tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
     return JSON.parse(decodeURIComponent(escape(atob(part + '==='.slice((part.length+3)%4))))); }catch(e){ return {}; }
 }
-const c = idToken ? claims(idToken) : {};
-const uid = c.user_id || c.sub || '';
-const signedIn = !!uid;
-const isGuest = !!(c.firebase && c.firebase.sign_in_provider === 'anonymous');
-const $ = id => document.getElementById(id);
+let idToken = '', c = {}, uid = '', signedIn = false, isGuest = false, lastUid = null;
+function readToken(){
+  const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const queryParams = new URLSearchParams(location.search);
+  idToken = (hashParams.get('t') || queryParams.get('t') || '').trim();
+  c = idToken ? claims(idToken) : {};
+  uid = c.user_id || c.sub || '';
+  signedIn = !!uid;
+  isGuest = !!(c.firebase && c.firebase.sign_in_provider === 'anonymous');
+}
+// Pass the sign-in token along so each page knows who you are, and add a "Home" link back
+const baseHrefs = {};
+['goDaily','goWeekly','goProgress','goHelp'].forEach(id => { baseHrefs[id] = $(id).href; });
+function passToken(){
+  if(!idToken) return;
+  const enc = encodeURIComponent(idToken);
+  ['goDaily','goWeekly','goProgress'].forEach(id => { $(id).href = baseHrefs[id] + '#t=' + enc + '&from=home'; });
+  $('goHelp').href = baseHrefs.goHelp + '#from=home&t=' + enc;
+}
+// Auth-dependent UI — re-run whenever the token may have changed (page return, new sign-in).
+// v3: the Sign out button shows whenever signed in (the old frame check hid it in the
+// native app, where this page IS the WebView document, not a frame inside one).
+function renderAuth(){
+  readToken();
+  passToken();
+  $('guest').classList.toggle('show', isGuest);
+  $('goSignIn').style.display = (epInFrame() && (!signedIn || isGuest)) ? 'flex' : 'none';
+  if(!isGuest) $('goCheckinPrompt').style.display = 'none';
+  const acctEl = $('acct');
+  if(signedIn) acctEl.classList.add('web'); else acctEl.classList.remove('web');
+  $('acctWho').textContent = !signedIn ? '' : isGuest ? 'Guest mode' : (c.email ? 'Signed in as ' + c.email : 'Signed in');
+  if(epInFrame() && (!signedIn || isGuest)){ $('acctSignIn').style.display = 'inline-block'; if(isGuest) $('acctSignIn').textContent = 'Create a free account'; }
+  else { $('acctSignIn').style.display = 'none'; }
+  if(signedIn) document.querySelectorAll('.signup-fallback').forEach(function(el){ el.classList.remove('show'); });
+  if(uid !== lastUid){ lastUid = uid; if(uid) load().catch(()=>{}); }
+}
 
 // Greeting
 const h = new Date().getHours();
 $('hello').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-if(isGuest) $('guest').classList.add('show');
-// Web only: show the Sign In card when signed out or in guest mode (the app shows its own button)
-if(epInFrame() && (!signedIn || isGuest)) $('goSignIn').style.display = 'flex';
-
-// Pass the sign-in token along so each page knows who you are, and add a "Home" link back
-if(idToken){
-  const tail = '#t=' + encodeURIComponent(idToken) + '&from=home';
-  ['goDaily','goWeekly','goProgress'].forEach(id => $(id).href += tail);
-  $('goHelp').href += '#from=home&t=' + encodeURIComponent(idToken);
-}
+renderAuth();
+// Re-check when the user comes back to this page (e.g. after signing in in another tab)
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) renderAuth(); });
+window.addEventListener('pageshow', renderAuth);
+window.addEventListener('focus', renderAuth);
 
 // Today's status + streaks from the user's own daily check-ins
 const dayKey = d => d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
@@ -280,16 +311,10 @@ async function load(){
     if(isGuest) $('goCheckinPrompt').style.display = 'flex'; // guest nudge: shows after every daily check-in, until they have an account
   }
 }
-load().catch(()=>{});
 // ---- Your account: Sign out / Delete Account ----
-// Web: these buttons run here. Native app: FlutterFlow's own Sign Out / Delete Account buttons sit below this page.
-const SIGNOUT_URL = 'https://app.eddieprevention.org/signOut';
+// The in-page Sign out / Delete buttons run here, in the app and on the web.
+// (FlutterFlow's own buttons below this page were not reachable, so the page shows its own whenever signed in.)
 (function(){
-  const web = epInFrame();
-  const acctEl = $('acct');
-  if(web && signedIn) acctEl.classList.add('web');
-  $('acctWho').textContent = !signedIn ? '' : isGuest ? 'Guest mode' : (c.email ? 'Signed in as ' + c.email : 'Signed in');
-  if(web && (!signedIn || isGuest)){ $('acctSignIn').style.display = 'inline-block'; if(isGuest) $('acctSignIn').textContent = 'Create a free account'; }
   $('btnSignOut').addEventListener('click', ()=>{ setTimeout(()=>$('signOutFallback').classList.add('show'), 1500); });
   const modal = $('delModal'), msg = $('delMsg'), go = $('delGo');
   const close = ()=>{ modal.classList.remove('show'); msg.style.display='none'; go.disabled=false; go.textContent='Delete'; };
@@ -321,7 +346,7 @@ const SIGNOUT_URL = 'https://app.eddieprevention.org/signOut';
         if(/CREDENTIAL_TOO_OLD|TOKEN_EXPIRED|INVALID_ID_TOKEN/.test(e)) return fail('For your security, please sign out, sign back in, and then delete your account.');
         return fail('Your account was not deleted. Please try again.');
       }
-      modal.querySelector('.ep-sheet').innerHTML = '<div class="big">✅</div><h3>Account deleted</h3><p>Your account and check-ins have been removed. Thank you for using Eddie Prevention.</p><div class="row"><a class="ep-confirm" style="display:block;text-decoration:none;text-align:center;flex:1;border-radius:14px;padding:13px 10px;font-weight:700;background:#1B9BD7;color:#fff" href="'+SIGNOUT_URL+'" target="_top">Continue</a></div>';
+      modal.querySelector('.ep-sheet').innerHTML = '<div class="big">✅</div><h3>Account deleted</h3><p>Your account and check-ins have been removed. Thank you for using Eddie Prevention.</p><div class="row"><a class="ep-confirm" style="display:block;text-decoration:none;text-align:center;flex:1;border-radius:14px;padding:13px 10px;font-weight:700;background:#1B9BD7;color:#fff" href="'+EP_SIGNOUT_URL+'" onclick="return epOpenSignOut(event)">Continue</a></div>';
     }catch(e){ fail('No connection. Please check your internet and try again.'); }
   });
 })();
