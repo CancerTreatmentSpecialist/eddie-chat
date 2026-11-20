@@ -7,12 +7,17 @@
 <!--
   Eddie Prevention — app Homepage (WebView).
   FlutterFlow WebView URL (Combine Text):
-    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-home.html?v=3#t=  +  Authenticated User → Id token (JWT token)
+    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-home.html?v=4#t=  +  Authenticated User → Id token (JWT token)
   Buttons open the Daily, Weekly, and My Progress pages inside this same WebView (each has a "‹ Home" link back).
   Reads the user's own daily_logs (owner-only rules) to show today's status and streaks.
   v3 (Nov 19, 2026): Sign out is shown whenever signed in (it was hidden in the app by a frame check) and uses the
   new-tab-then-same-frame chain (target="_top" is blocked inside the WebView); the page re-checks its sign-in state
   every time it comes back into view, so guest cards disappear once a real sign-in lands; footer links use the same chain.
+  v4 (Nov 20, 2026) — FIX 1, signup double-open: the v3 epOpenExternal() called window.open('_blank'), which on
+  Nov 20 live check did TWO things at once (opened a new tab at /createAccount AND switched the original tab
+  in-app to the same form). Sign-up and sign-out now use ONE navigation only: a single same-window location
+  change, no window.open, no new tab, no fallback timer. External links (Privacy/Terms/Disclaimer) still use
+  epOpenExternal, unchanged.
 -->
 <style>
 :root{
@@ -67,7 +72,7 @@ main{padding:0 16px;margin-top:-54px;position:relative}
 var EP_SIGNIN_URL = 'https://app.eddieprevention.org/createAccount';
 var EP_SIGNOUT_URL = 'https://app.eddieprevention.org/signOut';
 function epInFrame(){ try{ return window.top !== window.self; }catch(e){ return true; } }
-function epGoSignIn(){ try{ window.top.location.href = EP_SIGNIN_URL; }catch(e){ window.open(EP_SIGNIN_URL, '_top'); } }
+function epGoSignIn(){ window.location.href = EP_SIGNIN_URL; }
 // Links out of this page: this page runs inside the app's WebView frame, where a plain
 // target="_top" link is silently blocked. Try a new tab first (best on the web:
 // the app stays open); if popups are blocked, fall back to navigating this
@@ -87,8 +92,15 @@ function epOpenExternal(url, e, fallbackSel){
   }
   return false;
 }
-function epOpenSignUp(e){ return epOpenExternal(EP_SIGNIN_URL, e, '.signup-fallback'); }
-function epOpenSignOut(e){ return epOpenExternal(EP_SIGNOUT_URL, e, null); }
+// FIX 1 (v4): ONE navigation only. No window.open / '_blank' — that is what caused the
+// double-open (new tab + in-app switch) found in the Nov 20 live check.
+function epOpenSingle(url, e){
+  if(e) e.preventDefault();
+  window.location.href = url;
+  return false;
+}
+function epOpenSignUp(e){ return epOpenSingle(EP_SIGNIN_URL, e); }
+function epOpenSignOut(e){ return epOpenSingle(EP_SIGNOUT_URL, e); }
 function epSignInDetail(){
   return epInFrame()
     ? '<a class="ep-signin" style="text-align:center;text-decoration:none" href="'+EP_SIGNIN_URL+'" target="_top">Sign in or create a free account &rarr;</a>'
@@ -190,7 +202,7 @@ function epSignInDetail(){
       <a class="acct-out" id="acctSignIn" href="https://app.eddieprevention.org/createAccount" onclick="return epOpenSignUp(event)" style="display:none;text-decoration:none">Sign in or create account</a>
       <div class="acct-fallback signup-fallback" id="signUpFallbackAcct">If nothing happened, <a href="https://app.eddieprevention.org/createAccount">tap here to create your free account</a>.</div>
       <div class="acct-only"><a class="acct-out" id="btnSignOut" href="https://app.eddieprevention.org/signOut" onclick="return epOpenSignOut(event)" style="text-decoration:none">Sign out</a>
-        <div class="acct-fallback" id="signOutFallback">If nothing happened, <a href="https://app.eddieprevention.org/signOut" target="_blank" rel="noopener">tap here to sign out</a>.</div></div>
+        <div class="acct-fallback" id="signOutFallback">If nothing happened, <a href="https://app.eddieprevention.org/signOut">tap here to sign out</a>.</div></div>
       <div class="acct-links">
         <a href="https://eddieprevention.org/privacy.html" onclick="return epOpenExternal('https://eddieprevention.org/privacy.html', event)">Privacy Policy</a>
         <a href="https://eddieprevention.org/terms.html" onclick="return epOpenExternal('https://eddieprevention.org/terms.html', event)">Terms of Use</a>
