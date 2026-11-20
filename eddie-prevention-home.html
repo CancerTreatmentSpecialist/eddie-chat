@@ -7,7 +7,7 @@
 <!--
   Eddie Prevention — app Homepage (WebView).
   FlutterFlow WebView URL (Combine Text):
-    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-home.html?v=5#t=  +  Authenticated User → Id token (JWT token)
+    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-home.html?v=6#t=  +  Authenticated User → Id token (JWT token)
   Buttons open the Daily, Weekly, and My Progress pages inside this same WebView (each has a "‹ Home" link back).
   Reads the user's own daily_logs (owner-only rules) to show today's status and streaks.
   v3 (Nov 19, 2026): Sign out is shown whenever signed in (it was hidden in the app by a frame check) and uses the
@@ -20,6 +20,8 @@
   epOpenExternal, unchanged.
   v5 (Nov 20, 2026) — FIX 5, iPhone scroll: body bottom padding 28px -> 120px so the last cards scroll fully
   clear of the FlutterFlow bottom nav on phones (same fix as Daily v2 / Weekly v2). No other change from v4.
+  v6 (Nov 20, 2026): bottom padding 120px -> 72px — 120 left a large blank band at the end of scroll in the v21
+  TestFlight build; 72px still clears the bottom nav. No other change from v5.
 -->
 <style>
 :root{
@@ -29,7 +31,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);overflow-x:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:120px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:72px}
 .wrap{max-width:560px;margin:0 auto}
 .hero{background:linear-gradient(140deg,#27ADE6 0%,var(--brand) 45%,var(--deep) 100%);color:#fff;padding:calc(30px + env(safe-area-inset-top)) 22px 78px;border-radius:0 0 34px 34px;position:relative;overflow:hidden}
 .hero:after{content:"";position:absolute;right:-70px;top:-70px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08)}

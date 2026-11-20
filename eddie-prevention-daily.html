@@ -7,9 +7,11 @@
 <!--
   Eddie Prevention — Daily Check-In (built from CancerLess daily-checkin-v2).
   FlutterFlow WebView URL (Combine Text):
-    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-daily.html?v=2#t=  +  Authenticated User → Id token (JWT token)
+    https://cancertreatmentspecialist.github.io/eddie-chat/eddie-prevention-daily.html?v=3#t=  +  Authenticated User → Id token (JWT token)
   Saves to Firestore `daily_logs` as the signed-in user (owner-only rules apply).
   v2 (Nov 20, 2026): body bottom padding 24px -> 120px so the Save button scrolls fully clear of the FlutterFlow bottom nav on phones.
+  v3 (Nov 20, 2026): bottom padding 120px -> 72px — 120 left a large blank band at the end of scroll in testing;
+  72px still clears the bottom nav. No other change from v2.
   Writes real units (activityMinutes, sleepHours, fruitCups, vegCups, alcoholDrinks, nicotineType, cravings)
   AND the 1–5 fields (exercise, nutrition, sleep, tobaccoUsed, alcoholUsed, wellnessScore) used by My Progress.
 -->
@@ -22,7 +24,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);overflow-x:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:120px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:72px}
 .wrap{max-width:560px;margin:0 auto}
 .hero{background:linear-gradient(135deg,var(--brand),var(--deep));color:#fff;padding:26px 20px 66px;border-radius:0 0 30px 30px}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
